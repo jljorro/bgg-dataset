@@ -1,0 +1,10 @@
+# Author: José L. Jorro Aragoneses
+# Date: 22/04/2025
+
+#-----------------------------------------------------
+# EVALUATION SETTINGS
+#-----------------------------------------------------
+
+metrics: ['NDCG', 'MRR', 'Precision', 'Recall']
+topk: [5, 10, 15, 20, 25]
+metric_decimal_place: 5
