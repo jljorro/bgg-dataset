@@ -4,15 +4,16 @@ from recbole.quick_start import objective_function
 HYPER_PATHS = '../hypers/{}.hyper'
 CONFIG_PATHS = '../configs/{}.yml'
 
+DATASET = 'ratings'
+
 hp = HyperTuning(
     objective_function=objective_function, 
     algo='bayes', 
     early_stop=15,
     max_evals=100, 
-    params_file=HYPER_PATHS.format('knn'), 
-    fixed_config_file_list=[CONFIG_PATHS.format('environment'), 
-                            CONFIG_PATHS.format('data_GeneralRS'), 
-                            CONFIG_PATHS.format('evaluation')],
+    params_file=HYPER_PATHS.format('itemknn'), 
+    fixed_config_file_list=[CONFIG_PATHS.format('environment_{}'.format(DATASET)), 
+                            CONFIG_PATHS.format('data_GeneralRS')],
 )
 
 # run
