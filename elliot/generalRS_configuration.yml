@@ -1,0 +1,132 @@
+# Author: José L. Jorro Aragoneses
+# Date: 24/04/2025
+
+#-----------------------------------------------------
+# CONFIGURATION CLASSIC ALGORITHMS
+#-----------------------------------------------------
+
+experiment:
+
+  gpu: 1
+
+  dataset: bgg25_raw_ratings
+
+  prefiltering:
+    strategy: global_threshold
+    threshold: 6.5
+
+  data_config:
+    strategy: fixed
+    train_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.train.tsv
+    validation_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.valid.tsv
+    test_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.test.tsv
+
+  top_k: 100
+
+  models:
+    ItemKNN:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      neighbors: [uniform, 5, 1000]
+      similarity: [cosine, euclidean, dice, jaccard, mahalanobis]
+      implementation: classical
+    UserKNN:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      neighbors: [uniform, 5, 1000]
+      similarity: [cosine, euclidean, dice, jaccard, mahalanobis]
+      implementation: classical
+    PureSVD:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      seed: 42
+      factors: [uniform, 1, 350]
+      early_stopping:
+        patience: 10
+        monitor: nDCG@10
+        mode: auto
+        verbose: True
+        min_delta: 0.001
+        rel_delta: 0.1
+        baseline: 0.1
+    LightGCN:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      lr: [loguniform, 1e-5, 1e-1]
+      epochs: 300
+      batch_size: 512
+      factors: [uniform, 1, 200]
+      l_w: [loguniform, 1e-6, 1e-2]
+      n_layers: [unifor, 1, 10]
+      n_fold: 5
+      early_stopping:
+        patience: 10
+        monitor: nDCG@10
+        mode: auto
+        verbose: True
+        min_delta: 0.001
+        rel_delta: 0.1
+        baseline: 0.1
+    MF:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      epochs: 300
+      batch_size: 512
+      factors: [uniform, 1, 350]
+      lr: [loguniform, 1e-5, 1e-1]
+      reg: [loguniform, 1e-6, 1e-2]
+      early_stopping:
+        patience: 10
+        monitor: nDCG@10
+        mode: auto
+        verbose: True
+        min_delta: 0.001
+        rel_delta: 0.1
+        baseline: 0.1
+    Random:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+      seed: 42
+    MostPop:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+
+  evaluation:
+    cutoffs: [5, 10]
+    simple_metrics: [nDCG, MRR, Precision, Recall]
+
+  path_output_rec_result: outputs/result
+  path_output_rec_weight: outputs/weight
+  path_output_rec_performance: outputs/performance
+  path_log_folder: outputs/logs
+
+  
