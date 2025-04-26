@@ -8,5 +8,5 @@
 gpu_id: 1
 
 # Dataset path and name
-data_path: ../data/
-dataset: bgg_25_discrete_metadata
+data_path: ../../data/
+dataset: bgg_25_discrete_reviews
