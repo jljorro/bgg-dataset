@@ -1,0 +1,3 @@
+learning_rate:
+  type: loguniform
+  bounds: ["1e-5","1e-1"]
