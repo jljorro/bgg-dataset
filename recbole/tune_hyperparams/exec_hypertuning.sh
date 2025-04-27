@@ -1,6 +1,27 @@
 #!/bin/bash
 
 echo "********************************************"
-echo "Running hyperparameter tuning for ItemKNN on bgg_24 dataset using Hyperopt..."
+echo "Running Hyperparameter Tuning for BGG25 Dataset Metadata Continuous with FM"
 
-python knn_hyper.py --model='ItemKNN' --dataset='bgg_24' --tool=Hyperopt
+python FM_metadata_cont_hyper.py --model='FM' --dataset='bgg25_continuous_metadata' --tool=Hyperopt
+
+echo "Finished Hyperparameter Tuning for BGG25 Dataset Metadata Continuous with FM"
+echo "********************************************"
+echo "Running Hyperparameter Tuning for BGG25 Dataset Metadata Discrete with FM"
+
+python FM_metadata_disc_hyper.py --model='FM' --dataset='bgg25_discrete_metadata' --tool=Hyperopt
+
+echo "Finished Hyperparameter Tuning for BGG25 Dataset Metadata Discrete with FM"
+echo "********************************************"
+echo "Running Hyperparameter Tuning for BGG25 Dataset Reviews Continuous with FM"
+
+python FM_reviews_cont_hyper.py --model='FM' --dataset='bgg25_continuous_reviews' --tool=Hyperopt
+
+echo "Finished Hyperparameter Tuning for BGG25 Dataset Reviews Continuous with FM"
+echo "********************************************"
+echo "Running Hyperparameter Tuning for BGG25 Dataset Reviews Discrete with FM"
+
+python FM_reviews_disc_hyper.py --model='FM' --dataset='bgg25_discrete_reviews' --tool=Hyperopt
+
+echo "Finished Hyperparameter Tuning for BGG25 Dataset Reviews Discrete with FM"
+echo "********************************************"
