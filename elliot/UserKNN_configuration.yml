@@ -1,0 +1,48 @@
+# Author: José L. Jorro Aragoneses
+# Date: 24/04/2025
+
+#-----------------------------------------------------
+# CONFIGURATION CLASSIC ALGORITHMS
+#-----------------------------------------------------
+
+experiment:
+
+  gpu: 1
+
+  dataset: bgg25_raw_ratings
+
+  prefiltering:
+    strategy: global_threshold
+    threshold: 6.5
+
+  data_config:
+    strategy: fixed
+    train_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.train.tsv
+    validation_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.valid.tsv
+    test_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f0.test.tsv
+
+  top_k: 100
+
+  models:
+    UserKNN:
+      meta:
+        save_recs: True
+        save_weights: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        validation_metric: nDCG@10
+      neighbors: [uniform, 5, 1000]
+      similarity: [cosine, euclidean, dice, jaccard, mahalanobis]
+      implementation: classical
+
+  evaluation:
+    cutoffs: [5, 10]
+    simple_metrics: [nDCG, MRR, Precision, Recall]
+
+  path_output_rec_result: outputs/userknn/result
+  path_output_rec_weight: outputs/userknn/weight
+  path_output_rec_performance: outputs/userknn/performance
+  path_log_folder: outputs/userknn/logs
+
+  
