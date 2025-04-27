@@ -5,8 +5,10 @@
 # ENVIRONMENT SETTINGS
 #-----------------------------------------------------
 
-gpu_id: 1
+gpu_id: 0
 
 # Dataset path and name
-data_path: ../../data/
-dataset: bgg_25_discrete_metadata
+data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
+dataset: bgg25_discrete_metadata
+
+model: FM

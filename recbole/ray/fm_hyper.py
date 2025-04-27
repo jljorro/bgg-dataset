@@ -4,6 +4,7 @@ import yaml
 from recbole.quick_start import run_recbole, objective_function
 from recbole.config import Config
 
+import ray
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 
@@ -43,6 +44,9 @@ config_files = [
 
 base_config = Config(config_file_list=config_files)
 base_config_dict = dict(base_config.final_config_dict)
+base_config_dict['nproc'] = 20
+print(base_config_dict)
+
 
 # 3. Definición del Espacio de Búsqueda
 search_space = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
@@ -59,6 +63,8 @@ def train_rec_sys(config):
     # Reportar a Ray Tune
     tune.report(objective=best_valid_score)
 
+ray.init()
+
 # 5. Configuración del Scheduler de Tune
 scheduler = ASHAScheduler(
     metric='ndcg@10',
@@ -70,11 +76,11 @@ scheduler = ASHAScheduler(
 
 # 6. Ejecutar Tune
 analysis = tune.run(
-    train_rec_sys,
-    config=search_space,
+    tune.with_parameters(train_rec_sys),
+    config=base_config_dict,
     num_samples=50,
     scheduler=scheduler,
-    resources_per_trial={'gpu': 1}
+    resources_per_trial={'cpu': 1}
 )
 
 # 7. (Opcional) Guardar el mejor modelo/config
