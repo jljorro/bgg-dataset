@@ -3,3 +3,4 @@ log_tensorboard/
 saved/
 *.tsv
 *.inter
+outputs
