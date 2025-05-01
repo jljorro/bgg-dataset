@@ -16,7 +16,8 @@ def get_config_file_list():
     """
     config_files = [
         CONFIG_PATHS.format('environment_{}'.format(DATASET)), 
-        CONFIG_PATHS.format('data_CARS')
+        CONFIG_PATHS.format('data_CARS'),
+        CONFIG_PATHS.format('evaluation')
     ]
 
     config_files = [os.path.join(os.getcwd(), file) for file in config_files]
@@ -57,7 +58,7 @@ def main():
     config = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
 
     scheduler = ASHAScheduler(
-        metric="recall@10", 
+        metric="ndcg@10", 
         mode="max", 
         max_t=10, 
         grace_period=1, 
@@ -72,7 +73,7 @@ def main():
         log_to_file='./logs',
         scheduler=scheduler,
         local_dir=local_dir,
-        resources_per_trial={"cpu": 1},
+        resources_per_trial={"gpu": 1},
     )
 
     best_trial = result.get_best_trial("recall@10", "max", "last")

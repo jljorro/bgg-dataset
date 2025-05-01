@@ -5,6 +5,14 @@
 # EVALUATION SETTINGS
 #-----------------------------------------------------
 
+eval_args:
+  split: {'RS':[0.8,0.1,0.1]}
+  group_by: user
+  order: TO
+  mode: full
+
+neg_sampling: {'uniform': 1}
+
 metrics: ['NDCG', 'MRR', 'Precision', 'Recall']
 topk: [5, 10, 15, 20, 25]
 metric_decimal_place: 5

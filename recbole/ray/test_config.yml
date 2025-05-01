@@ -1,9 +1,14 @@
-# Author: José L. Jorro Aragoneses
-# Date: 22/04/2025
+# Configuration for FM using Context
 
-#-----------------------------------------------------
-# DATA SETTINGS
-#-----------------------------------------------------
+gpu_id: 1
+
+state: DEBUG
+
+# Dataset path and name
+data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
+dataset: bgg25_discrete_metadata
+
+# Data configutation
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: game_id
 RATING_FIELD: rating
@@ -17,3 +22,21 @@ threshoold:
   {'rating': 6.5}
 
 benchmark_filename: ['f0.train', 'f0.valid', 'f0.test']
+
+
+# Model Used
+model: FM
+
+# Evaluation Configuration
+
+eval_args:
+  split: {'RS':[0.8,0.1,0.1]}
+  order: TO
+  group_by: user_id
+  mode: full
+
+train_neg_sample_args: ~
+
+metrics: ['NDCG', 'MRR', 'Precision', 'Recall']
+topk: [5, 10, 15, 20, 25]
+metric_decimal_place: 5
