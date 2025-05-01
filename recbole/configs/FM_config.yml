@@ -1,6 +1,7 @@
 # Configuration for FM using Context
-
 gpu_id: 1
+
+# state: DEBUG
 
 # Dataset path and name
 data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
@@ -25,16 +26,12 @@ benchmark_filename: ['f0.train', 'f0.valid', 'f0.test']
 # Model Used
 model: FM
 
-# Evaluation Configuration
-
 eval_args:
   split: {'RS':[0.8,0.1,0.1]}
   order: TO
-  group_by: user_id
-  mode: full
-
+  group_by: user
+  mode: labeled
 train_neg_sample_args: ~
 
-metrics: ['NDCG', 'MRR', 'Precision', 'Recall']
-topk: [5, 10, 15, 20, 25]
-metric_decimal_place: 5
+metrics: ['AUC', 'LogLoss']
+valid_metric: AUC

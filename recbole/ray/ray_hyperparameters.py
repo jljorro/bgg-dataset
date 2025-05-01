@@ -15,9 +15,7 @@ def get_config_file_list():
     Get the list of configuration files for the RecBole model.
     """
     config_files = [
-        CONFIG_PATHS.format('environment_{}'.format(DATASET)), 
-        CONFIG_PATHS.format('data_CARS'),
-        CONFIG_PATHS.format('evaluation')
+        CONFIG_PATHS.format('FM_config')
     ]
 
     config_files = [os.path.join(os.getcwd(), file) for file in config_files]
@@ -58,7 +56,7 @@ def main():
     config = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
 
     scheduler = ASHAScheduler(
-        metric="ndcg@10", 
+        metric="auc", 
         mode="max", 
         max_t=10, 
         grace_period=1, 
@@ -76,7 +74,7 @@ def main():
         resources_per_trial={"gpu": 1},
     )
 
-    best_trial = result.get_best_trial("recall@10", "max", "last")
+    best_trial = result.get_best_trial("auc", "max", "last")
     print("best params: ", best_trial.config)
     print("best result: ", best_trial.last_result)
 

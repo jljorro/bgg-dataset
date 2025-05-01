@@ -6,3 +6,4 @@ saved/
 outputs
 .python-version
 recbole/logs_server/
+ray_results/
