@@ -5,3 +5,4 @@ saved/
 *.inter
 outputs
 .python-version
+recbole/logs_server/
