@@ -45,9 +45,6 @@ def load_search_space(yaml_path):
     return search_space
 
 def main():
-
-    print(os.path.join(os.getcwd()))
-
     config_file_list = get_config_file_list()
 
     ray.init()
@@ -56,7 +53,7 @@ def main():
     config = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
 
     scheduler = ASHAScheduler(
-        metric="auc", 
+        metric="best_valid_result/auc", 
         mode="max", 
         max_t=10, 
         grace_period=1, 
@@ -71,7 +68,7 @@ def main():
         log_to_file='./logs',
         scheduler=scheduler,
         local_dir=local_dir,
-        resources_per_trial={"gpu": 1},
+        resources_per_trial={"gpu": 1, "cpu": 1},
     )
 
     best_trial = result.get_best_trial("auc", "max", "last")
