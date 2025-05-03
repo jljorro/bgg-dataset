@@ -8,12 +8,12 @@ from ray.tune.schedulers import ASHAScheduler
 
 
 def get_scheduler():
-    scheduler = ASHAScheduler(metric="auc", mode="max", grace_period=1, reduction_factor=2, brackets=1, max_t=100)
+    scheduler = ASHAScheduler(metric="recall", mode="max", grace_period=1, reduction_factor=2, brackets=1, max_t=100)
     return scheduler
 
 
-def train_recbole(config):
-    config = Config(config_file_list=config)
+def train_recbole(config: dict = None):
+    config = Config(config_dict=config)
     init_seed(config["seed"], config["reproducibility"])
     init_logger(config)
 
@@ -32,8 +32,8 @@ def train_recbole(config):
     return model_name, best_valid_score, best_valid_result, test_result, model_file
 
 
-def objective_function(config):
-    model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config)
-    tune.report(auc=best_valid_score)
+def objective_function(config: None, config_dict: dict):
+    model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config=config_dict)
+    tune.report(recall=best_valid_score)
 
-    return {"model": model_name, "auc": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}
+    return {"model": model_name, "recall": best_valid_score, "best_valid_result/recall@10": best_valid_result, "test_result": test_result}

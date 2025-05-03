@@ -1,10 +1,10 @@
 import yaml
 import os
-from trainer import objective_function, get_scheduler
+from recbole.quick_start import objective_function
 
 import ray
 from ray import tune
-from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler
 
 CONFIG_PATHS = '../configs/{}.yml'
 SEARCH_SPACE_PATHS = '{}_search.yml'
@@ -52,26 +52,23 @@ def main():
 
     config = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
 
-    # scheduler = ASHAScheduler(
-    #     metric="best_valid_result/auc", 
-    #     mode="max", 
-    #     max_t=10, 
-    #     grace_period=1, 
-    #     reduction_factor=2
-    # )
-    scheduler = get_scheduler()
-    reporter = CLIReporter(metric_columns=["auc"], print_intermediate_tables=True, max_report_frequency=600)
+    scheduler = ASHAScheduler(
+        metric="auc", 
+        mode="max", 
+        max_t=10, 
+        grace_period=1, 
+        reduction_factor=2
+    )
 
     local_dir = "./ray_results"
     result = tune.run(
-        tune.with_parameters(objective_function, config=config_file_list),
+        tune.with_parameters(objective_function, config_file_list=config_file_list),
         config=config,
         num_samples=5,
         log_to_file='./logs',
         scheduler=scheduler,
         local_dir=local_dir,
-        progress_reporter=reporter,
-        resources_per_trial={"gpu": 10},
+        resources_per_trial={"gpu": 1, "cpu": 1},
     )
 
     best_trial = result.get_best_trial("auc", "max", "last")

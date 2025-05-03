@@ -33,5 +33,5 @@ eval_args:
   mode: labeled
 train_neg_sample_args: ~
 
-metrics: ['AUC', 'LogLoss']
-valid_metric: AUC
+metrics: ['auc']
+valid_metric: auc
