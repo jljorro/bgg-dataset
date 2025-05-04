@@ -8,7 +8,7 @@ from ray.tune.schedulers import ASHAScheduler
 
 
 def get_scheduler():
-    scheduler = ASHAScheduler(metric="recall", mode="max", grace_period=1, reduction_factor=2, brackets=1, max_t=100)
+    scheduler = ASHAScheduler(metric="auc", mode="max", grace_period=1, reduction_factor=2, brackets=1, max_t=100)
     return scheduler
 
 

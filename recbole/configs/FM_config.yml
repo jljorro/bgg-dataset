@@ -1,5 +1,5 @@
 # Configuration for FM using Context
-gpu_id: 1
+# gpu_id: 1
 
 # state: DEBUG
 

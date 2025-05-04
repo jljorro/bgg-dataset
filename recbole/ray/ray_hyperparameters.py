@@ -70,11 +70,11 @@ def main():
         #tune.with_parameters(objective_function, config_file_list=config_file_list),
         tune.with_parameters(objective_function, config_file_list=config_file_list),
         config=config,
-        num_samples=5,
+        num_samples=20,
         log_to_file='./logs',
         scheduler=scheduler,
         local_dir=local_dir,
-        resources_per_trial={"cpu": 1},
+        resources_per_trial={"gpu": 1, "cpu": 40},
     )
 
     best_trial = result.get_best_trial("auc", "max", "last")
