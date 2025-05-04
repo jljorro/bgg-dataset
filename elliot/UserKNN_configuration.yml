@@ -33,7 +33,7 @@ experiment:
         hyper_opt_alg: tpe
         validation_metric: nDCG@10
       neighbors: [uniform, 5, 500]
-      similarity: [cosine, euclidean, dice, jaccard, mahalanobis]
+      similarity: [cosine, euclidean, dice, jaccard]
       implementation: classical
 
   evaluation:
