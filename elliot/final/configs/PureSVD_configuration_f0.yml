@@ -43,9 +43,9 @@ experiment:
     cutoffs: [5, 10]
     simple_metrics: [nDCG, MRR, Precision, Recall]
 
-  path_output_rec_result: outputs/puresvd/result
-  path_output_rec_weight: outputs/puresvd/weight
-  path_output_rec_performance: outputs/puresvd/performance
-  path_log_folder: outputs/puresvd/logs
+  path_output_rec_result: outputs/puresvd_f0/result
+  path_output_rec_weight: outputs/puresvd_f0/weight
+  path_output_rec_performance: outputs/puresvd_f0/performance
+  path_log_folder: outputs/puresvd_f0/logs
 
   

@@ -36,9 +36,9 @@ experiment:
     cutoffs: [5, 10]
     simple_metrics: [nDCG, MRR, Precision, Recall]
 
-  path_output_rec_result: outputs/itemknn/result
-  path_output_rec_weight: outputs/itemknn/weight
-  path_output_rec_performance: outputs/itemknn/performance
-  path_log_folder: outputs/itemknn/logs
+  path_output_rec_result: outputs/itemknn_f1/result
+  path_output_rec_weight: outputs/itemknn_f1/weight
+  path_output_rec_performance: outputs/itemknn_f1/performance
+  path_log_folder: outputs/itemknn_f1/logs
 
   

@@ -46,9 +46,9 @@ experiment:
     cutoffs: [5, 10]
     simple_metrics: [nDCG, MRR, Precision, Recall]
 
-  path_output_rec_result: outputs/mf/result
-  path_output_rec_weight: outputs/mf/weight
-  path_output_rec_performance: outputs/mf/performance
-  path_log_folder: outputs/mf/logs
+  path_output_rec_result: outputs/mf_f0/result
+  path_output_rec_weight: outputs/mf_f0/weight
+  path_output_rec_performance: outputs/mf_f0/performance
+  path_log_folder: outputs/mf_f0/logs
 
   

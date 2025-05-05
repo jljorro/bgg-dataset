@@ -33,9 +33,9 @@ experiment:
     cutoffs: [5, 10]
     simple_metrics: [nDCG, MRR, Precision, Recall]
 
-  path_output_rec_result: outputs/mostpop/result
-  path_output_rec_weight: outputs/mostpop/weight
-  path_output_rec_performance: outputs/mostpop/performance
-  path_log_folder: outputs/mostpop/logs
+  path_output_rec_result: outputs/mostpop_f2/result
+  path_output_rec_weight: outputs/mostpop_f2/weight
+  path_output_rec_performance: outputs/mostpop_f2/performance
+  path_log_folder: outputs/mostpop_f2/logs
 
   
