@@ -17,9 +17,10 @@ experiment:
 
   data_config:
     strategy: fixed
-    train_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f1.train.tsv
-    validation_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f1.valid.tsv
-    test_path: ../data/bgg25_raw_ratings/bgg25_raw_ratings.f1.test.tsv
+    dataset_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/
+    train_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f0.train.tsv
+    validation_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f0.valid.tsv
+    test_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f0.test.tsv
 
   top_k: 600
 

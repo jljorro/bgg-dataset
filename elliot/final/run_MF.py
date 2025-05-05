@@ -1,4 +1,4 @@
 from elliot.run import run_experiment
 
 for i in range (0, 5):
-    run_experiment(f'MF_configuration_f{i}.yml')
+    run_experiment(f'configs/MF_configuration_f{i}.yml')
