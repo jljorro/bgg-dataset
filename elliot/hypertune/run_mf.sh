@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPTS=("MF")
+
+for script in ${SCRIPTS[@]}; do
+    echo "Ejecutando script ${script}..."
+    python3 "run_${script}.py" > logs/$script.log 2>&1 &
+    echo "${script} finalizado!"
+done
+
+wait
