@@ -31,9 +31,9 @@ experiment:
         save_weights: True
       epochs: 300
       batch_size: 512
-      factors: 9
-      lr: 1.0704799529633544,
-      reg: 1.0069454207436996,
+      factors: 32
+      lr: 0.0001,
+      reg: 0.00001,
       early_stopping:
         patience: 10
         monitor: nDCG@10
