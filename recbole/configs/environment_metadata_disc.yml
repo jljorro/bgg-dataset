@@ -7,10 +7,6 @@
 
 gpu_id: 1
 
-state: 'DEBUG'
-
 # Dataset path and name
 data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
 dataset: bgg25_discrete_metadata
-
-model: FM

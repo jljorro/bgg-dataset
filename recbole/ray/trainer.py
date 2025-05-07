@@ -35,26 +35,5 @@ def train_recbole(config_dict=None, config_file_list=None):
 
 def objective_function(config_dict=None, config_file_list=None):
     model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config_dict=config_dict, config_file_list=config_file_list)
-    # tune.report(auc=best_valid_score)
 
-    return {"model": model_name, "auc": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}
-
-# def objective_function(config_dict=None, config_file_list=None):
-
-#     config = Config(config_dict=config_dict, config_file_list=config_file_list)
-#     init_seed(config['seed'])
-#     dataset = create_dataset(config)
-#     train_data, valid_data, test_data = data_preparation(config, dataset)
-#     model_name = config['model']
-#     model = get_model(model_name)(config, train_data._dataset).to(config['device'])
-#     trainer = get_trainer(config['MODEL_TYPE'], config['model'])(config, model)
-#     best_valid_score, best_valid_result = trainer.fit(train_data, valid_data, verbose=False)
-#     test_result = trainer.evaluate(test_data)
-
-#     return {
-#         'model': model_name,
-#         'best_valid_score': best_valid_score,
-#         'valid_score_bigger': config['valid_metric_bigger'],
-#         'best_valid_result': best_valid_result,
-#         'test_result': test_result
-#     }
+    return {"model": model_name, "AUC": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}

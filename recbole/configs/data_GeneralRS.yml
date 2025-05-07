@@ -13,6 +13,6 @@ load_col:
   inter: ['user_id', 'item_id', 'rating', 'timestamp']
 
 threshoold:
-  {'rating': 6.5}
+  {'rating': 7.0}
 
 benchmark_filename: ['f0.train', 'f0.valid', 'f0.test']

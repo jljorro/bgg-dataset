@@ -12,6 +12,7 @@ from trainer import *
 CONFIG_PATHS = '../configs/{}.yml'
 SEARCH_SPACE_PATHS = '{}_search.yml'
 DATASET = 'metadata_disc'
+ALGORITHM = 'FM'
 
 def get_config_file_list():
     """
@@ -47,30 +48,19 @@ def load_search_space(yaml_path):
     
     return search_space
 
-def main():
-    config_file_list = get_config_file_list()
+def exec_hyperparameter_search(config_file_list, config_ray):
 
     ray.init()
     tune.register_trainable("train_func", objective_function)
-
-    config = load_search_space(SEARCH_SPACE_PATHS.format('fm'))
-
-    # scheduler = ASHAScheduler(
-    #     metric="auc", 
-    #     mode="max", 
-    #     max_t=10, 
-    #     grace_period=1, 
-    #     reduction_factor=2
-    # )
-
+    
     scheduler = get_scheduler()
 
     local_dir = "./ray_results"
     result = tune.run(
         #tune.with_parameters(objective_function, config_file_list=config_file_list),
         tune.with_parameters(objective_function, config_file_list=config_file_list),
-        config=config,
-        num_samples=20,
+        config=config_ray,
+        num_samples=10,
         log_to_file='./logs',
         scheduler=scheduler,
         local_dir=local_dir,
@@ -81,6 +71,12 @@ def main():
     print("best params: ", best_trial.config)
     print("best result: ", best_trial.last_result)
 
+def main():
+
+    config_file_list = get_config_file_list()
+    config_ray = load_search_space(SEARCH_SPACE_PATHS.format(ALGORITHM))
+
+    exec_hyperparameter_search(config_file_list, config_ray)
 
 if __name__ == '__main__':
     main()

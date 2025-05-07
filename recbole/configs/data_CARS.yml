@@ -14,6 +14,6 @@ load_col:
   inter: ['user_id', 'game_id', 'rating', 'timestamp', 'playing_time_very_short', 'playing_time_short', 'playing_time_moderate', 'playing_time_long', 'playing_time_very_long', 'gaming_mood_party', 'gaming_mood_easy-going', 'gaming_mood_expert', 'gaming_mood_intense', 'gaming_mood_cooperative', 'gaming_mood_competitive', 'gaming_mood_thematic', 'gaming_mood_story-based', 'social_companion_1-player', 'social_companion_2-players', 'social_companion_large-group', 'social_companion_toddlers', 'social_companion_preschoolers', 'social_companion_children', 'social_companion_family', 'social_companion_friends']
 
 threshoold:
-  {'rating': 6.5}
+  {'rating': 7.0}
 
-benchmark_filename: ['f0.train', 'f0.valid', 'f0.test']
+#benchmark_filename: ['f0.train', 'f0.valid', 'f0.test']
