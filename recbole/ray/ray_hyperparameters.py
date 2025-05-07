@@ -6,6 +6,8 @@ import os
 import ray
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
+from ray.tune.search.hyperopt import HyperOptSearch
+from hyperopt import hp
 
 from trainer import *
 
@@ -48,26 +50,54 @@ def load_search_space(yaml_path):
     
     return search_space
 
-def exec_hyperparameter_search(config_file_list, config_ray):
+# def exec_hyperparameter_search(config_file_list, config_ray):
 
-    ray.init()
-    tune.register_trainable("train_func", objective_function)
+#     ray.init()
+#     tune.register_trainable("train_func", objective_function)
     
-    scheduler = get_scheduler()
+#     scheduler = get_scheduler()
+
+#     local_dir = "./ray_results"
+#     result = tune.run(
+#         #tune.with_parameters(objective_function, config_file_list=config_file_list),
+#         tune.with_parameters(objective_function, config_file_list=config_file_list),
+#         config=config_ray,
+#         num_samples=10,
+#         log_to_file='./logs',
+#         scheduler=scheduler,
+#         local_dir=local_dir,
+# #        resources_per_trial={"gpu": 1, "cpu": 40},
+#         resources_per_trial={"cpu": 10}
+#     )
+
+#     best_trial = result.get_best_trial("auc", "max", "last")
+#     print("best params: ", best_trial.config)
+#     print("best result: ", best_trial.last_result)
+
+def exec_hyperparameter_search(config_file_list, config_ray):
+    ray.init()
+
+    tune.register_trainable("train_func", objective_function)
+
+    search_alg = HyperOptSearch(
+        metric="auc", mode="max"
+    )
+
+    scheduler = ASHAScheduler(metric="auc", mode="max")
 
     local_dir = "./ray_results"
     result = tune.run(
-        #tune.with_parameters(objective_function, config_file_list=config_file_list),
         tune.with_parameters(objective_function, config_file_list=config_file_list),
         config=config_ray,
         num_samples=10,
         log_to_file='./logs',
         scheduler=scheduler,
+        search_alg=search_alg,
         local_dir=local_dir,
-        resources_per_trial={"gpu": 1, "cpu": 40},
+        resources_per_trial={"cpu": 10}
     )
 
-    best_trial = result.get_best_trial("AUC", "max", "last")
+    best_trial = result.get_best_trial("auc", "max", "last")
     print("best params: ", best_trial.config)
     print("best result: ", best_trial.last_result)
 

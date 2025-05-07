@@ -39,4 +39,4 @@ def train_recbole(config_dict=None, config_file_list=None):
 def objective_function(config_dict=None, config_file_list=None):
     model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config_dict=config_dict, config_file_list=config_file_list)
 
-    return {"model": model_name, "AUC": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}
+    return {"model": model_name, "auc": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}
