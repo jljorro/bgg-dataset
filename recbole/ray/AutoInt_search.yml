@@ -1,0 +1,27 @@
+learning_rate:
+  type: loguniform
+  bounds: [1e-5, 1e-1]
+
+embedding_size:
+  type: choice
+  values: [16, 32, 64]
+
+attention_size:
+  type: choice
+  values: [16, 32, 64]
+
+n_layers:
+  type: choice
+  values: [1, 2, 3]
+
+num_heads:
+  type: choice
+  values: [1, 2, 4]
+
+dropout_probs:
+  type: choice
+  values: ['[0.0, 0.0, 0.0]','[0.1, 0.1, 0.1]','[0.2, 0.2, 0.2]','[0.3, 0.2, 0.1]']
+
+mlp_hidden_size:
+  type: choice
+  values: ['[128]', '[128,64]', '[256,128]', '[256,128,64]','[64,64,64]','[128,128,128]','[256,256,256]','[512,512,512]']

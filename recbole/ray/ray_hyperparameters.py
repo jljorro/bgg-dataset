@@ -14,14 +14,15 @@ from trainer import *
 CONFIG_PATHS = '../configs/{}.yml'
 SEARCH_SPACE_PATHS = '{}_search.yml'
 DATASET = 'metadata_disc'
-ALGORITHM = 'FM'
+#ALGORITHMS = ['FM', 'DeepFM', 'NMF', 'AutoInt', 'DCN']
+ALGORITHMS = ['DCN']
 
-def get_config_file_list():
+def get_config_file_list(algorithm):
     """
     Get the list of configuration files for the RecBole model.
     """
     config_files = [
-        CONFIG_PATHS.format('FM_config')
+        CONFIG_PATHS.format(f'{algorithm}_config')
     ]
 
     config_files = [os.path.join(os.getcwd(), file) for file in config_files]
@@ -50,30 +51,6 @@ def load_search_space(yaml_path):
     
     return search_space
 
-# def exec_hyperparameter_search(config_file_list, config_ray):
-
-#     ray.init()
-#     tune.register_trainable("train_func", objective_function)
-    
-#     scheduler = get_scheduler()
-
-#     local_dir = "./ray_results"
-#     result = tune.run(
-#         #tune.with_parameters(objective_function, config_file_list=config_file_list),
-#         tune.with_parameters(objective_function, config_file_list=config_file_list),
-#         config=config_ray,
-#         num_samples=10,
-#         log_to_file='./logs',
-#         scheduler=scheduler,
-#         local_dir=local_dir,
-# #        resources_per_trial={"gpu": 1, "cpu": 40},
-#         resources_per_trial={"cpu": 10}
-#     )
-
-#     best_trial = result.get_best_trial("auc", "max", "last")
-#     print("best params: ", best_trial.config)
-#     print("best result: ", best_trial.last_result)
-
 def exec_hyperparameter_search(config_file_list, config_ray):
     ray.init()
 
@@ -89,12 +66,13 @@ def exec_hyperparameter_search(config_file_list, config_ray):
     result = tune.run(
         tune.with_parameters(objective_function, config_file_list=config_file_list),
         config=config_ray,
-        num_samples=10,
+        num_samples=20,
         log_to_file='./logs',
         scheduler=scheduler,
         search_alg=search_alg,
         local_dir=local_dir,
-        resources_per_trial={"cpu": 10}
+        resources_per_trial={"cpu": 10} # Uncomment in local
+        # resources_per_trial={"cpu": 40, "gpu": 1} # Uncomment in ceres
     )
 
     best_trial = result.get_best_trial("auc", "max", "last")
@@ -103,10 +81,19 @@ def exec_hyperparameter_search(config_file_list, config_ray):
 
 def main():
 
-    config_file_list = get_config_file_list()
-    config_ray = load_search_space(SEARCH_SPACE_PATHS.format(ALGORITHM))
+    for algorithm in ALGORITHMS:
+        print(f"Running hyperparameter search for {algorithm}...")
+        config_file_list = get_config_file_list(algorithm)
+        config_ray = load_search_space(SEARCH_SPACE_PATHS.format(algorithm))
 
-    exec_hyperparameter_search(config_file_list, config_ray)
+        exec_hyperparameter_search(config_file_list, config_ray)
+        print(f"Finished hyperparameter search for {algorithm}.")
+        print("=====================================")
+
+    # config_file_list = get_config_file_list()
+    # config_ray = load_search_space(SEARCH_SPACE_PATHS.format(ALGORITHM))
+
+    # exec_hyperparameter_search(config_file_list, config_ray)
 
 if __name__ == '__main__':
     main()
