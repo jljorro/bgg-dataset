@@ -34,5 +34,5 @@ eval_args:
   
 
 
-metrics: ['AUC', 'LogLoss']
-valid_metric: AUC
+metrics: ['auc', 'LogLoss']
+valid_metric: auc
