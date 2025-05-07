@@ -67,7 +67,7 @@ def exec_hyperparameter_search(config_file_list, config_ray):
         resources_per_trial={"gpu": 1, "cpu": 40},
     )
 
-    best_trial = result.get_best_trial("auc", "max", "last")
+    best_trial = result.get_best_trial("AUC", "max", "last")
     print("best params: ", best_trial.config)
     print("best result: ", best_trial.last_result)
 

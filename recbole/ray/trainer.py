@@ -30,6 +30,9 @@ def train_recbole(config_dict=None, config_file_list=None):
     test_result = trainer.evaluate(test_data)
     model_file = trainer.saved_model_file
 
+    print(f"Best valid score: {best_valid_score}")
+    print(f"Best valid result: {best_valid_result}")
+    print(f"Test result: {test_result}")
     return model_name, best_valid_score, best_valid_result, test_result, model_file
 
 
