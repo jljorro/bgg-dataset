@@ -1,12 +1,3 @@
-# Configuration for FM using Context
-# gpu_id: 1
-
-# state: DEBUG
-
-# Dataset path and name
-data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
-dataset: bgg25_discrete_metadata
-
 # Data configutation
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: game_id
@@ -15,7 +6,7 @@ TIME_FIELD: timestamp
 load_col:
   inter: ['user_id', 'game_id', 'rating', 'timestamp', 'playing_time_very_short', 'playing_time_short', 'playing_time_moderate', 'playing_time_long', 'playing_time_very_long', 'gaming_mood_party', 'gaming_mood_easy-going', 'gaming_mood_expert', 'gaming_mood_intense', 'gaming_mood_cooperative', 'gaming_mood_competitive', 'gaming_mood_thematic', 'gaming_mood_story-based', 'social_companion_1-player', 'social_companion_2-players', 'social_companion_large-group', 'social_companion_toddlers', 'social_companion_preschoolers', 'social_companion_children', 'social_companion_family', 'social_companion_friends']
 threshold:
-  rating: 6.5
+  rating: 7
 
 train_neg_sample_args: ~
 

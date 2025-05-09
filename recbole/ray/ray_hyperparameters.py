@@ -13,15 +13,15 @@ from trainer import *
 
 CONFIG_PATHS = '../configs/{}.yml'
 SEARCH_SPACE_PATHS = '{}_search.yml'
-DATASET = 'metadata_disc'
-#ALGORITHMS = ['FM', 'DeepFM', 'NMF', 'AutoInt', 'DCN']
-ALGORITHMS = ['DCN']
+DATASETS = ['discrete_metadata', 'continuous_metadata', 'discrete_reviews', 'continuous_reviews']
+ALGORITHMS = ['FM', 'DeepFM', 'NMF', 'AutoInt', 'DCN']
 
-def get_config_file_list(algorithm):
+def get_config_file_list(dataset, algorithm):
     """
     Get the list of configuration files for the RecBole model.
     """
     config_files = [
+        CONFIG_PATHS.format(f'{dataset}'),
         CONFIG_PATHS.format(f'{algorithm}_config')
     ]
 
@@ -81,14 +81,15 @@ def exec_hyperparameter_search(config_file_list, config_ray):
 
 def main():
 
-    for algorithm in ALGORITHMS:
-        print(f"Running hyperparameter search for {algorithm}...")
-        config_file_list = get_config_file_list(algorithm)
-        config_ray = load_search_space(SEARCH_SPACE_PATHS.format(algorithm))
+    for dataset in DATASETS:
+        for algorithm in ALGORITHMS:
+            print(f"Running hyperparameter search for {algorithm} and dataset {dataset}...")
+            config_file_list = get_config_file_list(dataset, algorithm)
+            config_ray = load_search_space(SEARCH_SPACE_PATHS.format(algorithm))
 
-        exec_hyperparameter_search(config_file_list, config_ray)
-        print(f"Finished hyperparameter search for {algorithm}.")
-        print("=====================================")
+            exec_hyperparameter_search(config_file_list, config_ray)
+            print(f"Finished hyperparameter search for {algorithm}.")
+            print("=====================================")
 
     # config_file_list = get_config_file_list()
     # config_ray = load_search_space(SEARCH_SPACE_PATHS.format(ALGORITHM))
