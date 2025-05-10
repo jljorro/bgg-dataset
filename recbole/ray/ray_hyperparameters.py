@@ -52,7 +52,7 @@ def load_search_space(yaml_path):
     return search_space
 
 def exec_hyperparameter_search(config_file_list, config_ray):
-    ray.init()
+    # ray.init()
 
     tune.register_trainable("train_func", objective_function)
 
@@ -81,6 +81,8 @@ def exec_hyperparameter_search(config_file_list, config_ray):
 
 def main():
 
+    ray.init()
+    
     for dataset in DATASETS:
         for algorithm in ALGORITHMS:
             print(f"Running hyperparameter search for {algorithm} and dataset {dataset}...")
