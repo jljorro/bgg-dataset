@@ -13,7 +13,7 @@ experiment:
 
   prefiltering:
     strategy: global_threshold
-    threshold: 6.5
+    threshold: 7
 
   data_config:
     strategy: fixed
