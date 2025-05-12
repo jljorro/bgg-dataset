@@ -88,6 +88,12 @@ def main():
     
     for dataset in DATASETS:
         for algorithm in ALGORITHMS:
+
+            if f"{dataset}_{algorithm}" in TRAINED:
+                print(f"Skipping hyperparameter search for {algorithm} and dataset {dataset} as it has already been trained.")
+                continue
+            print("=====================================")
+
             print(f"Running hyperparameter search for {algorithm} and dataset {dataset}...")
             config_file_list = get_config_file_list(dataset, algorithm)
             config_ray = load_search_space(SEARCH_SPACE_PATHS.format(algorithm))
@@ -95,6 +101,6 @@ def main():
             exec_hyperparameter_search(config_file_list, config_ray)
             print(f"Finished hyperparameter search for {algorithm} and dataset {dataset}.")
             print("=====================================")
-            
+
 if __name__ == '__main__':
     main()
