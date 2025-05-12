@@ -37,6 +37,10 @@ def train_recbole(config_dict=None, config_file_list=None):
 
 
 def objective_function(config_dict=None, config_file_list=None):
-    model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config_dict=config_dict, config_file_list=config_file_list)
+    try:
+        model_name, best_valid_score, best_valid_result, test_result, _ = train_recbole(config_dict=config_dict, config_file_list=config_file_list)
+    except ValueError as e:
+        print(f"ValueError: {e}")
+        return {"model": None, "auc": 0, "best_valid_result/auc@10": 0, "test_result": 0}
 
     return {"model": model_name, "auc": best_valid_score, "best_valid_result/auc@10": best_valid_result, "test_result": test_result}
