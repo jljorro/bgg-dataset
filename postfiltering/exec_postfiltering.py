@@ -15,15 +15,15 @@ TRAIN_PATH = "../data/bgg25_{}/bgg25_{}.f{}.train.inter"
 RESULTS_PATH = "./results/{}_{}_f{}_postfiltering.tsv" #Dataset, Algorithm, Fold
 
 # NAMES
-# DATASETS = ['discrete_metadata', 'continuous_metadata', 'discrete_reviews', 'continuous_reviews']
-# ALGORITHMS = ['mf', 'puresvd', 'userknn', 'itemknn']
+DATASETS = ['discrete_metadata', 'continuous_metadata', 'discrete_reviews', 'continuous_reviews']
+ALGORITHMS = ['mf', 'puresvd', 'userknn', 'itemknn']
 
-DATASETS = ['discrete_metadata']
-ALGORITHMS = ['mf']
+# DATASETS = ['discrete_metadata']
+# ALGORITHMS = ['mf']
 
 # INPUTS
 FOLDS = 5
-N_PROCESSES = 5  # Number of processes to use for parallel processing
+N_PROCESSES = 10  # Number of processes to use for parallel processing
 
 def init_logging():
     """
