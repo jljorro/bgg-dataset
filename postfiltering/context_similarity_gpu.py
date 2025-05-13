@@ -2,74 +2,89 @@ import pandas as pd
 import cupy as cp
 import numpy as np
 
-from cuml.metrics import pairwise_distances
-
-
-class ContextSimilarity:
+class ContextPostfiltering:
     """
     Class to calculate context similarity using GPU (CuPy + cuML).
     """
 
-    def __init__(self, train: pd.DataFrame):
+    def __init__(self, train: pd.DataFrame, test: pd.DataFrame, predictions: pd.DataFrame):
         """
-        Initialize the ContextSimilarity class with training data.
+        Initialize the ContextPostfiltering class.
+
+        Args:
+            train (pd.DataFrame): Training data.
+            test (pd.DataFrame): Test data.
+            predictions (pd.DataFrame): Predictions data.
         """
-        self.train = train
+        
+        # Create dictionary to map items IDs to indices
+        self.train_item_to_index = {item: index for index, item in enumerate(train['item_id'].unique())}
+        self.test_item_to_index = {item: index for index, item in enumerate(test['item_id'].unique())}
 
-        # Create a dictionary to store context for each item from training data
-        self.context_dict = {}
-        for _, row in train.iterrows():
-            item_id = int(row['game_id:token'])
-            context = row.iloc[4:].astype(float).tolist()  # Convert to float for GPU ops
-            self.context_dict[item_id] = context
+        # Extract vectors from DataFrames
+        self.train_vectors = self._extract_vectors_from_df(train, self.train_item_to_index)
+        self.test_vectors = self._extract_vectors_from_df(test, self.test_item_to_index)
 
-    def set_predictions(self, predictions: pd.DataFrame):
+    def _extract_vectors_from_df(self, df, item_to_index):
         """
-        Set the predictions for the test data.
+        Extrae una matriz (n_items, d) de vectores únicos usando columnas [5:] del DataFrame.
         """
-        self.predictions = predictions
+        vector_columns = df.columns[5:]  # columnas numéricas para los vectores
+        d = len(vector_columns)
+        vectors = np.zeros((len(item_to_index), d), dtype=np.float32)
 
-    def calculate_similarity(self, item_id: int, context: list) -> float:
+        for item_id, idx in item_to_index.items():
+            # Tomamos el primer vector para ese item_id
+            item_vector = df[df['item_id'] == item_id][vector_columns].iloc[0].to_numpy(dtype=np.float32)
+            vectors[idx] = item_vector
+
+        return vectors
+    
+    def fit(self):
         """
-        Compute cosine similarity between training item and current context using GPU.
+        Calcula la matriz de similitud coseno entre los ítems de train (filas) y test (columnas).
+        Resultado: matriz (n_train_items, n_test_items)
         """
-        if item_id not in self.context_dict:
-            return 0.0
+        # Paso 1: Normalizar los vectores (L2)
+        train_norm = cp.linalg.norm(self.train_matrix, axis=1, keepdims=True) + 1e-8
+        test_norm = cp.linalg.norm(self.test_matrix, axis=1, keepdims=True) + 1e-8
 
-        train_context = cp.array(self.context_dict[item_id], dtype=cp.float32).reshape(1, -1)
-        context = cp.array(context, dtype=cp.float32).reshape(1, -1)
+        train_normalized = self.train_matrix / train_norm
+        test_normalized = self.test_matrix / test_norm
 
-        # Normalize to unit vectors
-        train_context /= cp.linalg.norm(train_context, axis=1, keepdims=True)
-        context /= cp.linalg.norm(context, axis=1, keepdims=True)
+        # Paso 2: Producto punto → similitud coseno
+        # Resultado: (n_train_items, n_test_items)
+        self.similarity_matrix = cp.matmul(train_normalized, test_normalized.T)
 
-        # Compute cosine similarity
-        similarity = 1 - pairwise_distances(train_context, context, metric='cosine')[0][0]
-        return float(similarity)
-
-    def calculate_context_rank(self, user_id: int, item_id: int, context: list) -> pd.DataFrame:
+    def get_similarity(self, test_item_id: int, pred_item_ids: list[list[int]]) -> np.ndarray:
         """
-        Compute similarity between context and all predicted items for a user.
+        Dado un ítem de test y una lista de listas de ítems de predicción (por usuario),
+        devuelve una matriz con los ítems a comparar y su similitud con el ítem de test.
+
+        Salida: np.ndarray (n_preds, 2) con columnas [item_id, similitud], ordenado desc.
         """
-        user_predictions = self.predictions[self.predictions['user_id:token'] == user_id]
-        item_list = user_predictions['game_id:token'].tolist()
+        if self.similarity_matrix is None:
+            raise ValueError("Debes ejecutar fit() antes de usar get_similarity().")
 
-        train_contexts = []
-        for i in item_list:
-            c = self.context_dict.get(i, [0.0] * len(context))
-            train_contexts.append(c)
+        if test_item_id not in self.test_item_to_index:
+            raise KeyError(f"El test_item_id '{test_item_id}' no existe en test.")
 
-        train_matrix = cp.array(train_contexts, dtype=cp.float32)
-        context_vector = cp.array(context, dtype=cp.float32).reshape(1, -1)
+        test_idx = self.test_item_to_index[test_item_id]
 
-        # Normalize
-        train_matrix /= cp.linalg.norm(train_matrix, axis=1, keepdims=True)
-        context_vector /= cp.linalg.norm(context_vector, axis=1, keepdims=True)
+        # Aplanamos la lista de listas a una lista simple (único set de predicciones)
+        flat_pred_ids = [item_id for sublist in pred_item_ids for item_id in sublist]
 
-        similarity_scores = 1 - pairwise_distances(train_matrix, context_vector, metric='cosine').get().flatten()
+        similarities = []
+        for item_id in flat_pred_ids:
+            if item_id in self.train_item_to_index:
+                train_idx = self.train_item_to_index[item_id]
+                sim = float(self.similarity_matrix[train_idx, test_idx])
+                similarities.append((item_id, sim))
+            else:
+                # Si no está en train, puedes asignar 0 o NaN según preferencia
+                similarities.append((item_id, 0.0))
 
-        return pd.DataFrame({
-            'user_id:token': [f"{user_id}_{item_id}"] * len(item_list),
-            'game_id:token': item_list,
-            'similarity': similarity_scores
-        })
+        # Ordenamos por similitud descendente
+        sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
+
+        return np.array(sorted_similarities, dtype=object)
