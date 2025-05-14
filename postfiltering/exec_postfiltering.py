@@ -1,116 +1,99 @@
+import os
+import time
 import pandas as pd
 import numpy as np
-import logging
-import time
-
-from context_similarity import ContextSimilarity
-
 from multiprocessing import Pool, cpu_count
-
+from postfiltering.context_similarity import ContextPostfiltering
 
 # PATHS
 PREDICTIONS_PATH = "./general_predictions/{}_f{}_result.tsv"
 TEST_PATH = "../data/bgg25_{}/bgg25_{}.f{}.test.inter"
 TRAIN_PATH = "../data/bgg25_{}/bgg25_{}.f{}.train.inter"
-RESULTS_PATH = "./results/{}_{}_f{}_postfiltering.tsv" #Dataset, Algorithm, Fold
+RESULTS_PATH = "./results/{}_{}_f{}_postfiltering.tsv"
+RESULTS_GENERAL_PATH = "./results/{}_{}_f{}_general_postfiltering.tsv"
 
 # NAMES
 DATASETS = ['discrete_metadata', 'continuous_metadata', 'discrete_reviews', 'continuous_reviews']
 ALGORITHMS = ['mf', 'puresvd', 'userknn', 'itemknn']
 
-# DATASETS = ['discrete_metadata']
-# ALGORITHMS = ['mf']
-
 # INPUTS
 FOLDS = 5
-N_PROCESSES = 4  # Number of processes to use for parallel processing
+N_PROCESSES = min(4, cpu_count())  # Ajustable
 
-def init_logging():
-    """
-    Initialize logging configuration.
-    """
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler("postfiltering.log"),
-            logging.StreamHandler()
-        ]
-    )
-    logging.info("Logging initialized.")
 
-def process_chunk(chunk, train_df, predictions_df):
-    """
-    Función ejecutada en cada proceso del pool.
-    """
-    from context_similarity import ContextSimilarity  # Import dentro del proceso
-    context_similarity = ContextSimilarity(train_df)
-    context_similarity.set_predictions(predictions_df)
+def process_fold(args):
+    dataset, algorithm, fold = args
+    print(f"Procesando: {dataset} | {algorithm} | Fold {fold}")
 
-    result = []
-    for row in chunk:
+    # Cargar datos de entrenamiento
+    train_file = TRAIN_PATH.format(dataset, dataset, fold)
+    train_df = pd.read_csv(train_file, sep='\t', header=None, low_memory=False)
+
+    # Cargar datos de test
+    test_file = TEST_PATH.format(dataset, dataset, fold)
+    test_df = pd.read_csv(test_file, sep='\t', header=None).iloc[1:]
+
+    # Cargar predicciones
+    predictions_file = PREDICTIONS_PATH.format(algorithm, fold)
+    predictions_df = pd.read_csv(predictions_file, sep='\t', header=None)
+    predictions_by_user = predictions_df.groupby(by=0)
+
+    # Inicializar postfiltrado
+    context_postfiltering = ContextPostfiltering(train_df)
+
+    result_context = []
+    result_general = []
+
+    for idx, row in enumerate(test_df.itertuples(index=False)):
+        start_time = time.time()
+
         user_id = int(row[0])
         game_id = int(row[1])
-        context = row[4:]
-        context_rank = context_similarity.calculate_context_rank(user_id, game_id, context)
-        result.append(context_rank)
-    return result  # Lista de DataFrames
+        general_prediction = float(row[2])
+        context = np.array(row[4:], dtype=np.float32)
 
-def parallel_context_ranking(test_npy, train_df, predictions_df, n_processes):
-    """
-    Divide los datos de test y ejecuta procesamiento en paralelo.
-    """
-    chunk_size = int(np.ceil(len(test_npy) / n_processes))
-    chunks = [test_npy[i:i + chunk_size] for i in range(0, len(test_npy), chunk_size)]
+        try:
+            user_predictions = predictions_by_user.get_group(user_id).iloc[:, 1].values
+        except KeyError:
+            print(f"[Advertencia] Usuario {user_id} no tiene predicciones.")
+            continue
 
-    # Empaquetar argumentos para starmap
-    args = [(chunk, train_df, predictions_df) for chunk in chunks]
+        if len(user_predictions) != 600:
+            print(f"[Error] Usuario {user_id} tiene {len(user_predictions)} predicciones.")
+            continue
 
-    with Pool(processes=n_processes) as pool:
-        results = pool.starmap(process_chunk, args)
+        # Postfiltrado contextual
+        items_predicted, similarities = context_postfiltering.calculate_similarities(context, user_predictions)
 
-    # Aplanar la lista de listas de DataFrames
-    flattened = [df for sublist in results for df in sublist]
-    context_rank_df = pd.concat(flattened, ignore_index=True)
-    return context_rank_df
+        new_user_id = f"{user_id}_{game_id}"
+
+        result_context.append([new_user_id] + list(items_predicted) + list(similarities))
+        result_general.append([new_user_id] + list(user_predictions) + [general_prediction])
+
+        elapsed = time.time() - start_time
+        print(f"[Fold {fold}] {idx + 1}/{len(test_df)} - Tiempo por bloque: {elapsed:.3f} segundos")
+
+    # Guardar resultados
+    context_df = pd.DataFrame(result_context)
+    context_df.to_csv(RESULTS_PATH.format(dataset, algorithm, fold), sep='\t', index=False, header=False)
+
+    general_df = pd.DataFrame(result_general)
+    general_df.to_csv(RESULTS_GENERAL_PATH.format(dataset, algorithm, fold), sep='\t', index=False, header=False)
 
 
 def main():
+    args_list = [(dataset, algorithm, fold)
+                 for dataset in DATASETS
+                 for algorithm in ALGORITHMS
+                 for fold in range(FOLDS)]
 
-    init_logging()
+    print(f"Ejecutando {len(args_list)} tareas con {N_PROCESSES} procesos...")
 
-    for dataset in DATASETS:
-        for algorithm in ALGORITHMS:
-            for fold in range(FOLDS):
-                logging.info(f"Processing {dataset} with {algorithm} for fold {fold}")
+    with Pool(N_PROCESSES) as pool:
+        for i, _ in enumerate(pool.imap_unordered(process_fold, args_list), 1):
+            print(f"[INFO] Proceso {i}/{len(args_list)} completado.")
 
-                # Load training and test data
-                train_df = pd.read_csv(TRAIN_PATH.format(dataset, dataset, fold), sep="\t")
-                test_df = pd.read_csv(TEST_PATH.format(dataset, dataset, fold), sep="\t")
 
-                # Load predictions
-                predictions_df = pd.read_csv(PREDICTIONS_PATH.format(algorithm, fold), sep="\t", names=['user_id:token', 'game_id:token', 'prediction:float'])
-
-                # Initialize ContextSimilarity
-                context_similarity = ContextSimilarity(train_df)
-                context_similarity.set_predictions(predictions_df)
-
-                # Calculate similarity
-                context_rank_df = pd.DataFrame(columns=['user_id:token', 'game_id:token', 'similarity'])
-                test_npy = test_df.to_numpy()
-
-                 # Medir tiempo
-                start_time = time.time()
-                context_rank_df = parallel_context_ranking(test_npy, train_df, predictions_df, N_PROCESSES)
-                end_time = time.time()
-                logging.info(f"Execution time with {N_PROCESSES} processes: {end_time - start_time:.2f} seconds")
-
-                # Guardar resultados
-                context_rank_df.to_csv(RESULTS_PATH.format(dataset, algorithm, fold), sep="\t", index=False)
-                logging.info(f"Post-filtered predictions saved for {dataset}, {algorithm}, fold {fold}")
-
-                logging.info(f"Post-filtered predictions for {dataset} with {algorithm} for fold {fold} finished.")
 
 if __name__ == "__main__":
     main()
-

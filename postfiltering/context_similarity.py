@@ -1,101 +1,79 @@
-import pandas as pd
 import numpy as np
+from scipy.spatial.distance import cdist
 
-from sklearn.metrics.pairwise import cosine_similarity
+class ContextPostfiltering:
 
-
-class ContextSimilarity:
-    """
-    Class to calculate context similarity between two sets of data.
-    """
-
-    def __init__(self, train: pd.DataFrame):
+    def __init__(self, train_df):
         """
-        Initialize the ContextSimilarity class with training and testing data.
-
-        Args:
-            train (pd.DataFrame): Training data.
-            test (pd.DataFrame): Testing data.
+        Inicializa el modelo de postfiltrado contextual.
+        
+        Parámetros:
+        - train_df: pd.DataFrame con los datos de entrenamiento.
+                    Se espera que la segunda columna (índice 1) contenga los game_id,
+                    y que las columnas de contexto comiencen en la columna de índice 4.
         """
-        self.train = train
-
-        # Create a dictionary to store context for each item from training data
         self.context_dict = {}
-        for _, row in train.iterrows():
-            item_id = int(row['game_id:token'])
-            context = row.iloc[4:].tolist()  # Exclude the first four columns (user_id, game_id, rating, timestamp)
-            self.context_dict[item_id] = context
-
-    def set_predictions(self, predictions: pd.DataFrame):
-        """
-        Set the predictions for the test data.
-
-        Args:
-            predictions (pd.DataFrame): Predictions data.
-        """
-        self.predictions = predictions
-
-    def calculate_similarity(self, item_id: int, context: list) -> float:
-        """
-        Calculate the similarity between the context of a given item and the context of the training data.
-
-        Args:
-            item_id (int): The ID of the item to compare.
-            context (list): The context of the item to compare.
-
-        Returns:
-            float: The similarity score.
-        """
-        if item_id not in self.context_dict:
-            return 0.0
-
-        train_context = self.context_dict[item_id]
-        # Apply consine similarity form library scikit-learn
         
+        # Accede solo a las columnas necesarias: game_id y contexto
+        game_id_col_idx = 1
+        context_start_idx = 4
+        cols = [game_id_col_idx] + list(range(context_start_idx, train_df.shape[1]))
+        subset = train_df.iloc[:, cols]
 
-        # Convert lists to numpy arrays
-        train_context = np.array(train_context).reshape(1, -1)
-        context = np.array(context).reshape(1, -1)
-        similarity = cosine_similarity(train_context, context)[0][0]
-        return similarity
+        for row in subset.itertuples(index=False):
+            game_id = row[0]
+            if game_id not in self.context_dict:
+                # Convertimos el vector de contexto a tupla (más eficiente como clave si se necesita)
+                self.context_dict[game_id] = tuple(row[1:])
 
-    def calculate_context_rank(self, user_id: int, item_id: int, context: list) -> float:
+    def get_context(self, game_ids):
         """
-        Calculate the context rank for a given user and item.
-
-        Args:
-            user_id (int): The ID of the user.
-            item_id (int): The ID of the item.
-            context (list): The context of the item.
-
-        Returns:
-            float: The context rank score.
+        Dado una lista de game_ids, devuelve:
+        - una matriz NumPy (n_items_context_found x n_features_context) con los vectores de contexto disponibles
+        - un diccionario que mapea cada game_id a su índice de fila en la matriz (o -1 si no está disponible)
         """
-        # User predictions
-        user_predictions = self.predictions[self.predictions['user_id:token'] == user_id]
+        context_matrix = []
+        index_mapping = {}
 
-        # Get item list from user predictions
-        item_list = user_predictions['game_id:token'].tolist()
+        for idx, game_id in enumerate(game_ids):
+            context_vector = self.context_dict.get(game_id)
+            if context_vector is not None:
+                index_mapping[game_id] = len(context_matrix)
+                context_matrix.append(context_vector)
+            else:
+                index_mapping[game_id] = -1
 
-        # Calculate similarity for each item in the list
-        similarity_scores = []
-        for item in item_list:
-            similarity = self.calculate_similarity(item, context)
-            similarity_scores.append(similarity)
+        # Convertimos a NumPy array si se ha encontrado algún contexto
+        context_matrix = np.array(context_matrix) if context_matrix else np.empty((0, 0))
 
-        # Create matrix with user_id, item_id and similarity scores
-        similarity_matrix = pd.DataFrame({
-            'user_id:token': [f"{user_id}_{item_id}"] * len(item_list),
-            'game_id:token': item_list,
-            'similarity': similarity_scores
-        })
-        # Sort the matrix by similarity scores
-        similarity_matrix = similarity_matrix.sort_values(by='similarity', ascending=False)
+        return context_matrix, index_mapping
 
-        return similarity_matrix
-        
+    def calculate_similarities(self, context_query, items_predictions):
+        """
+        Calcula la similitud de coseno entre context_query y los contextos de items_predictions.
 
+        Parámetros:
+        - context_query: np.array de forma (n_context_features,)
+        - items_predictions: lista de game_ids a evaluar
 
-        
-            
-        
+        Retorna:
+        - Tupla (game_ids_sorted, similarities_sorted), ambos np.array ordenados por similitud descendente.
+        """
+        context_matrix, index_mapping = self.get_context(items_predictions)
+
+        game_ids_array = np.array(items_predictions)
+        similarities = np.full(len(game_ids_array), -np.inf, dtype=np.float32)
+
+        if context_matrix.size > 0:
+            context_query = context_query.reshape(1, -1)
+            cosine_sim = 1 - cdist(context_matrix, context_query, metric='cosine').flatten()
+
+            # Mapeamos game_ids válidos a sus posiciones en game_ids_array
+            valid_indices = [i for i, gid in enumerate(game_ids_array) if index_mapping[gid] != -1]
+            mapped_indices = [index_mapping[game_ids_array[i]] for i in valid_indices]
+
+            # Asignación directa por slicing
+            similarities[valid_indices] = cosine_sim[mapped_indices]
+
+        sorted_indices = np.argsort(-similarities)
+        return game_ids_array[sorted_indices], similarities[sorted_indices]
