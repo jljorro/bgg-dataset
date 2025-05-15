@@ -7,4 +7,5 @@ outputs
 .python-version
 recbole/logs_server/
 ray_results/
-recbole/ray/__pycache__/trainer.cpython-310.pyc
+__pycache__
+postfiltering/general_predictions.zip
