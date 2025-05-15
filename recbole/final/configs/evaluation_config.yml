@@ -1,0 +1,2 @@
+metrics: ['auc', 'LogLoss']
+valid_metric: auc

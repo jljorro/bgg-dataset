@@ -1,0 +1,3 @@
+# Dataset path and name
+data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
+dataset: bgg25_continuous_metadata

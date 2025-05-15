@@ -1,0 +1,3 @@
+learning_rate: 0.0034392060216099705
+dropout_prob: 0.4
+mlp_hidden_size: [64, 64, 64]
