@@ -1,7 +1,6 @@
 log/
 log_tensorboard/
 saved/
-*.tsv
 *.inter
 outputs
 .python-version
