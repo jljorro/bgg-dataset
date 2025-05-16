@@ -1,2 +1,2 @@
 use_gpu: True
-state: DEBUG
+state: INFO
