@@ -10,3 +10,8 @@ ray_results/
 __pycache__
 postfiltering/general_predictions.zip
 evaluation/prefiltering/analysis_prefiltering_ranks.ipynb
+recbole/ray/ray_results_servers/salida.txt
+recbole/ray/ray_results_servers/salida2.txt
+recbole/ray/ray_results_servers/salida3.txt
+recbole/ray/ray_results_servers/salida4.txt
+recbole/final/logs_ranks/get_rankings_optimized.log
