@@ -9,3 +9,5 @@ threshold:
   rating: 7
 
 train_neg_sample_args: ~
+
+epochs: 100
