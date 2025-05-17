@@ -52,14 +52,14 @@ First, execute all scripts in the `elliot/hypertune` folder to find the best hyp
 
 ```bash
 cd elliot/hypertune
-python run_all_models.py  # If available, otherwise run each script individually
+./run_experiments.sh
 ```
 
 Alternatively, you can run each hyperparameter tuning script individually:
 
 ```bash
-python tune_itemknn.py
-python tune_userknn.py
+python run_ItemKNN.py
+python run_UserKNN.py
 # Continue with other hyperparameter tuning scripts
 ```
 
@@ -73,15 +73,9 @@ Execute the final models with the optimized configurations:
 
 ```bash
 cd elliot/final
-python run_final_models.py  # If available, otherwise run each model individually
-```
-
-Or run each model separately:
-
-```bash
-python run_itemknn_final.py
-python run_userknn_final.py
-# Continue with other model scripts
+python run_ItemKNN.py
+python run User_KNN.py
+# Continue with other scripts
 ```
 
 ### RecBole Experiments
@@ -142,7 +136,7 @@ python evaluation/general/evaluation_script.py
 python evaluation/context/evaluation_script.py
 
 # For other recommender types (if available)
-python evaluation/[recommender_type]/evaluation_script.py
+python evaluation/cars_models/evaluation_script.py
 ```
 
 ### Examples
