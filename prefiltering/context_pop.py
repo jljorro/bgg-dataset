@@ -4,82 +4,81 @@ from collections import defaultdict, Counter
 
 class ContextPop:
     """
-    Clase que implementa un recomendador basado en la popularidad de los ítems dentro de cada contexto.
-    Para cada contexto, devuelve los ítems ordenados por frecuencia de aparición.
+    Class that implements a recommender based on the popularity of items within each context.
+    For each context, it returns the items sorted by frequency of appearance.
     """
 
     def __init__(self, train_df: pd.DataFrame):
-        # Guardamos el DataFrame completo
         self.train_df = train_df
         
-        # Creamos un diccionario para indexar los ítems por contexto
-        # y contar sus apariciones (popularidad)
+        # We created a dictionary to index items by context
+        # and count their occurrences (popularity)
         self.context_index = defaultdict(Counter)
         
-        print("Construyendo índice de contextos y calculando popularidad...")
-        # Preprocesamiento: creamos un índice para cada contexto único
-        # y contamos las apariciones de cada ítem
+        print("Building context index and calculating popularity...")
+        # Preprocessing: We create an index for each unique context
+        # and count the occurrences of each item
         for _, row in train_df.iterrows():
-            # Usamos nombres de columnas o iloc para evitar FutureWarning
+            # We use column names or iloc to avoid FutureWarning
             user_id = int(row.iloc[0]) if isinstance(row, pd.Series) else int(row[0])
             game_id = int(row.iloc[1]) if isinstance(row, pd.Series) else int(row[1])
             
-            # Extraemos el contexto (columnas a partir de la 5ta)
+            # We extract the context (columns starting from the 5th)
             if isinstance(row, pd.Series):
                 context_tuple = tuple(row.iloc[4:].astype(int))
             else:
                 context_tuple = tuple(row[4:].astype(int))
             
-            # Incrementamos el contador para este ítem en este contexto
+            # We increment the counter for this item in this context
             self.context_index[context_tuple][game_id] += 1
         
-        # Precalculamos las listas ordenadas de ítems por popularidad para cada contexto
-        print("Precalculando listas de items ordenadas por popularidad...")
+        # We precalculate the ordered lists of items by popularity for each context
+        print("Precalculating lists of items ordered by popularity...")
         self.context_items_sorted = {}
         for context, counter in self.context_index.items():
-            # Ordenamos los ítems por frecuencia (popularidad) descendente
+            # We sort the items by descending frequency (popularity)
             items_sorted = sorted(counter.items(), key=lambda x: x[1], reverse=True)
-            # Guardamos solo los IDs de ítems ya ordenados
+            # We only save the IDs of already sorted items
             self.context_items_sorted[context] = [item_id for item_id, _ in items_sorted]
             
-        print(f"Índice construido con {len(self.context_index)} contextos únicos")
+        print(f"Index built with {len(self.context_index)} unique contexts")
 
     def get_items_for_context(self, context_tuple):
-        """Obtiene la lista de ítems ordenados por popularidad para un contexto dado"""
+        """Gets the list of items sorted by popularity for a given context"""
         return self.context_items_sorted.get(context_tuple, [])
 
     def recommend(self, context_query, k):
         """
-        Recomienda los k ítems más populares para un contexto dado
-        
+        Recommends the k most popular items for a given context
+
         Args:
-            context_query: Vector de contexto
-            k: Número de ítems a recomendar
-            
+        context_query: Context vector
+        k: Number of items to recommend
+
         Returns:
-            Tupla de (lista de ids de ítems, lista de valores de relevancia)
+        Tuple of (list of item ids, list of relevance values)
         """
-        # Si context_query es un array de NumPy, lo convertimos a tupla
+        # If context_query is a NumPy array, we convert it to a tuple
         if isinstance(context_query, np.ndarray):
             context_tuple = tuple(context_query)
         else:
-            # Si ya es una tupla o lista, la usamos directamente
+            # If it's already a tuple or list, we use it directly
             context_tuple = tuple(context_query)
         
-        # Obtener los ítems ordenados por popularidad para este contexto
+        # Get items sorted by popularity for this context
         items = self.get_items_for_context(context_tuple)
         
-        # Si no hay items para este contexto, devolvemos listas vacías
+        # If there are no items for this context, we return empty lists
         if len(items) == 0:
             return [], []
         
-        # Tomamos solo los primeros k ítems (o todos si hay menos de k)
+        # We take only the first k items (or all of them if there are less than k)
         items_selected = items[:k]
         
-        # Convertimos a array de NumPy
+        # We convert to NumPy array
         items_array = np.array(items_selected)
         
-        # Generamos relevancia decreciente: k para el primer item, k-1 para el segundo, etc.
+        # We generate decreasing relevance: k for the first item, k-1 for the second, etc.
         relevance = np.arange(len(items_array), 0, -1)
         
         return items_array, relevance.tolist()

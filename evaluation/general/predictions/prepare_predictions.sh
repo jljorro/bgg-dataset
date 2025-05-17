@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Recorremos todos los directorios que coincidan con el patrón ALG*_f*/
+# Match the pattern ALG*_f*/ in every folder
 for dir in */*/; do
-    # Extraemos el nombre del algoritmo y el fold a partir del path del directorio
+    # Extract the name of algorithm and fold from folder path
     alg_fold=$(basename "$(dirname "$dir")")_$(basename "$dir")
     alg_fold=${alg_fold%/}
 
@@ -13,7 +13,7 @@ for dir in */*/; do
     for file in "$dir"*.tsv; do
         [[ -f "$file" ]] || continue
 
-        # Si tiene it=XX, lo evaluamos
+        # If it has it=XX, we evaluate it
         if [[ "$file" =~ it=([0-9]+) ]]; then
             it_val=${BASH_REMATCH[1]}
             if (( it_val > max_it )); then
@@ -21,19 +21,19 @@ for dir in */*/; do
                 selected_file="$file"
             fi
         elif [[ -z "$fallback_file" ]]; then
-            # Usamos como fallback el primer archivo sin it=XX que encontremos
+            # Use the fallback as the first file without it=XX that we found
             fallback_file="$file"
         fi
     done
 
-    # Si encontramos uno con it=XX, lo usamos. Si no, usamos el fallback si existe.
+    # If we find one with it=XX, we use it. Otherwise, we use the fallback if exists.
     if [[ -n "$selected_file" ]]; then
         new_name="${alg_fold}.tsv"
         mv "$selected_file" "./$new_name"
-        echo "Movido (con it): $selected_file → $new_name"
+        echo "Moved (with it): $selected_file → $new_name"
     elif [[ -n "$fallback_file" ]]; then
         new_name="${alg_fold}.tsv"
         mv "$fallback_file" "./$new_name"
-        echo "Movido (fallback): $fallback_file → $new_name"
+        echo "Moved (fallback): $fallback_file → $new_name"
     fi
 done

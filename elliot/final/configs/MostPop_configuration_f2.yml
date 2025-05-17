@@ -1,6 +1,3 @@
-# Author: José L. Jorro Aragoneses
-# Date: 24/04/2025
-
 #-----------------------------------------------------
 # CONFIGURATION CLASSIC ALGORITHMS
 #-----------------------------------------------------
@@ -17,10 +14,10 @@ experiment:
 
   data_config:
     strategy: fixed
-    dataset_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/
-    train_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.train.tsv
-    validation_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.valid.tsv
-    test_path: /home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.test.tsv
+    dataset_path: ~/bgg-recsys25/data/bgg25_raw_ratings/
+    train_path: ~/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.train.tsv
+    validation_path: ~/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.valid.tsv
+    test_path: ~/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f2.test.tsv
 
   top_k: 600
 
@@ -38,5 +35,3 @@ experiment:
   path_output_rec_weight: outputs/mostpop_f2/weight
   path_output_rec_performance: outputs/mostpop_f2/performance
   path_log_folder: outputs/mostpop_f2/logs
-
-  

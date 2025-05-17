@@ -1,8 +1,8 @@
 # Dataset path and name
-data_path: /home/jljorro/Desarrollo/bgg-recsys25/data/
+data_path: ~/bgg-recsys25/data/
 dataset: bgg25_discrete_metadata
 
-# Data configutation
+# Data configuration
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: game_id
 # RATING_FIELD: rating

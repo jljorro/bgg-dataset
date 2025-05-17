@@ -23,24 +23,24 @@ def get_qrel(dataset, fold):
     test_path = TEST_DATA_PATH.format(dataset, dataset, fold)
     test_df = pd.read_csv(test_path, sep="\t")
 
-    # Cambiamos el valor de la culumna 1 user_id:token, por un valor concat de user_id:token + _ + game_id:token
+    # Change the value of column 1 user_id:token, with a concat value of user_id:token + _ + game_id:token
     test_df['user_id:token'] = test_df['user_id:token'].astype(str) + "_" + test_df['game_id:token'].astype(str)
 
-    # Eliminamos las columnas desde la posición 3 hasta la última
+    # Remove columns from position 3 until the last one
     # test_df = test_df.drop(columns=test_df.columns[3:])
 
-    # Eliminamos la primea fila
+    # Remove the first row
     # test_df = test_df.drop(index=0)
 
-    # Eliminamos columna timestamp
+    # Remove the timestamp column
     test_df['rating:float'] = test_df['rating:float'].astype(float)
     test_df['rating:float'] = test_df['rating:float'].apply(lambda x: 1 if x >= THRESHOLD else 0)
 
-    # Convertimos las columnas user e item a string
+    # Transform user and item columns to string
     # test_df['user_id:token'] = test_df['user_id:token'].astype(str)
     test_df['game_id:token'] = test_df['game_id:token'].astype(str)
 
-     # Pasamos test_df a qrels
+    # From test_df to qrels
     qrel = Qrels.from_df(
             df = test_df,
             q_id_col = 'user_id:token',
@@ -53,18 +53,18 @@ def get_run(prediction_path):
     # Load predictions as run
     predictions_df = pd.read_csv(prediction_path, sep="\t", header=None, names=['user_id:token','item_id:token','score:float','test_item_id:token'])
 
-    # Eliminamos la primea fila
+    # Remove the first row
     predictions_df = predictions_df.drop(index=0)
 
-    # Cambiamos el valor de la culumna 1 user_id:token, por un valor concat de user_id:token + _ + game_id:token
+    # Change the value of column 1 user_id:token, with a concat value of user_id:token + _ + game_id:token
     predictions_df['user_id:token'] = predictions_df['user_id:token'].astype(str) + "_" + predictions_df['test_item_id:token'].astype(str)
 
-    # Convertimos las columnas user e item a string y prediction a float
+    # Transform user and item columns to string and prediction to float
     predictions_df['user_id:token'] = predictions_df['user_id:token'].astype(str)
     predictions_df['item_id:token'] = predictions_df['item_id:token'].astype(str)
     predictions_df['score:float'] = predictions_df['score:float'].astype(float)
 
-    # Pasamos predictions_df a run
+    # From predictions_df to run
     run = Run.from_df(
                 df = predictions_df,
                 q_id_col = 'user_id:token',
@@ -79,7 +79,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     
-    # Creamos un dataframe vacio para almacenar los resultados
+    # Create an empty dataframe to store the results
     results_df = pd.DataFrame(columns=['algorithm', 'fold', 'metric', 'value'])
 
     for dataset in DATASETS:
@@ -99,8 +99,7 @@ def main():
 
                     context_run = get_run(context_run_path)
 
-                    
-                    # Evaluamos
+                    # Evaluate
                     results = evaluate(
                         qrels=qrel,
                         run=context_run,
@@ -108,10 +107,9 @@ def main():
                         make_comparable=True
                     )
 
-                    # Incluimos los resultados en el dataframe
+                    # Add the results in the dataframe
                     for metric in results:
                         logger.info(f"Dataset: {dataset}, Algorithm: {algorithm}, Fold: {fold}, Metric: {metric}, Value: {results[metric]}")
-                        # Añadimos los resultados al dataframe sin append
                         results_df = pd.concat([results_df, pd.DataFrame({
                             'dataset': [dataset],
                             'algorithm': [algorithm],
@@ -122,7 +120,7 @@ def main():
                 else:
                     logger.info(f"Skipping {check} as it has already been evaluated.")
 
-    # Guardamos los resultados en un archivo
+    # Save results in file
     results_df.to_csv("results/prefiltering_results.csv", index=False)
 
 

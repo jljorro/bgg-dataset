@@ -16,7 +16,7 @@ SEARCH_SPACE_PATHS = '{}_search.yml'
 DATASETS = ['discrete_metadata', 'continuous_metadata', 'discrete_reviews', 'continuous_reviews']
 ALGORITHMS = ['FM', 'DeepFM', 'NFM', 'AutoInt', 'DCN']
 
-# Lista con los modelos ya entrenados para evitar volver a entrenarlos
+# List of already trained models to avoid retraining them
 TRAINED = ['discrete_metadata_FM', 'discrete_metadata_DeepFM', 'discrete_metadata_NMF', 'discrete_metadata_AutoInt', 'discrete_metadata_DCN',
           'continuous_metadata_FM', 'continuous_metadata_DeepFM']
 

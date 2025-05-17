@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Recorre todos los ficheros .gz en data/ y subdirectorios
 find data/ -type f -name "*.gz" | while read file; do
-  target="${file%.gz}"  # El nombre del fichero descomprimido
-  if [[ ! -f "$target" ]]; then  # Solo descomprime si no existe el fichero destino
-    echo "Descomprimiendo: $file"
-    gunzip -k "$file"  # -k para mantener el .gz original
+  target="${file%.gz}"
+  if [[ ! -f "$target" ]]; then
+    echo "Uncompressing: $file"
+    gunzip -k "$file"  # -k to keep the original .gz
   else
-    echo "Ya existe descomprimido: $target, saltando..."
+    echo "File already exists: $target, ignoring..."
   fi
 done

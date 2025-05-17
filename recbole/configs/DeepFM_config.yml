@@ -1,4 +1,4 @@
-# Data configutation
+# Data configuration
 USER_ID_FIELD: user_id
 ITEM_ID_FIELD: game_id
 TIME_FIELD: timestamp

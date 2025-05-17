@@ -17,7 +17,8 @@ pip install -r requirement.txt
 
 ### Scripts
 
-TODO
+Most scripts assume this repository is downloaded in the home (~) directory. Otherwise, you need to change the path directory in scripts and configuration files.
+
 
 ### Recommender models tested
 

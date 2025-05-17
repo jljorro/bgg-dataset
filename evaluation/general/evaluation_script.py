@@ -18,7 +18,7 @@ METRICS = ["hits@5", "hits@10",
 
 ALGORITHMS = ['random', 'mostpop', 'mf', 'puresvd', 'userknn', 'itemknn']
 PREDICTIONS_PATH = "./predictions/{}_f{}_result.tsv"
-TEST_PATH = "/home/jljorro/Desarrollo/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f{}.test.inter"
+TEST_PATH = "~/bgg-recsys25/data/bgg25_raw_ratings/bgg25_raw_ratings.f{}.test.inter"
 
 def get_qrel(fold):
 
@@ -26,19 +26,19 @@ def get_qrel(fold):
     test_path = TEST_PATH.format(fold)
     test_df = pd.read_csv(test_path, sep="\t", header=None, names=['user', 'item', 'rating', 'timestamp'])
 
-    # Eliminamos la primea fila
+    # Remove the first row
     test_df = test_df.drop(index=0)
 
-    # Eliminamos columna timestamp
+    # Remove timestamp columns
     test_df = test_df.drop(columns=['timestamp'])
     test_df['rating'] = test_df['rating'].astype(float)
     test_df['rating'] = test_df['rating'].apply(lambda x: 1 if x >= THRESHOLD else 0)
 
-    # Convertimos las columnas user e item a string
+    # Transform user and item columns to string
     test_df['user'] = test_df['user'].astype(str)
     test_df['item'] = test_df['item'].astype(str)
 
-     # Pasamos test_df a qrels
+     # From test_df to qrels
     qrel = Qrels.from_df(
             df = test_df,
             q_id_col = 'user',
@@ -52,12 +52,12 @@ def get_run(fold, algorithm):
     prediction_path = PREDICTIONS_PATH.format(algorithm, fold)
     predictions_df = pd.read_csv(prediction_path, sep="\t", header=None, names=['user', 'item', 'prediction'])
 
-    # Convertimos las columnas user e item a string y prediction a float
+    # Transform user and item columns to string and prediction to float
     predictions_df['user'] = predictions_df['user'].astype(str)
     predictions_df['item'] = predictions_df['item'].astype(str)
     predictions_df['prediction'] = predictions_df['prediction'].astype(float)
 
-    # Pasamos predictions_df a run
+    # From predictions_df to run
     run = Run.from_df(
                 df = predictions_df,
                 q_id_col = 'user',
@@ -72,7 +72,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     
-    # Creamos un dataframe vacio para almacenar los resultados
+    # Create an empty dataframe vacio to store the results
     results_df = pd.DataFrame(columns=['algorithm', 'fold', 'metric', 'value'])
 
     for fold in range(0, 5):
@@ -83,17 +83,16 @@ def main():
             logger.info(f"Evaluating algorithm {algorithm}")
             run = get_run(fold, algorithm)
 
-            # Evaluamos
+            # Evaluate
             results = evaluate(
                 qrels=qrel,
                 run=run,
                 metrics=METRICS
             )
 
-            # Incluimos los resultados en el dataframe
+            # Add results in dataframe
             for metric in results:
                 logger.info(f"Algorithm: {algorithm}, Fold: {fold}, Metric: {metric}, Value: {results[metric]}")
-                # Añadimos los resultados al dataframe sin append
                 results_df = pd.concat([results_df, pd.DataFrame({
                     'algorithm': [algorithm],
                     'fold': [fold],
@@ -101,7 +100,7 @@ def main():
                     'value': [results[metric]]
                 })], ignore_index=True)
 
-    # Guardamos los resultados en un archivo
+    # Save results in a file
     results_df.to_csv("results/general_algorithms_results.csv", index=False)
 
 

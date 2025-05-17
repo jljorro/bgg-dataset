@@ -21,43 +21,43 @@ AVAILABLE_METHODS = ['contextrandom', 'contextpop']
 
 # INPUTS
 FOLDS = 5
-# Número de chunks para procesar en paralelo - ajustar según el número de núcleos disponibles
+# Number of chunks to process in parallel - adjust according to the number of available cores
 NUM_WORKERS = max(1, mp.cpu_count() - 1)
 
 def generate_context_id(context):
-    """Genera un identificador único para un contexto"""
-    # Convertir el array a string y generar un hash
+    """Generates a unique identifier for a context"""
+    # Convert the array to a string and generate a hash
     context_str = ','.join(map(str, context))
-    return hashlib.md5(context_str.encode()).hexdigest()[:8]  # Usamos los primeros 8 caracteres del hash
+    return hashlib.md5(context_str.encode()).hexdigest()[:8]  # We use the first 8 characters of the hash
 
 def group_by_user_context(test_df):
-    """Agrupa los datos de test por usuario y contexto"""
-    # Extraer las columnas de contexto
-    context_columns = test_df.columns[4:]  # Las columnas de contexto comienzan desde la posición 4
+    """Groups test data by user and context"""
+    # Extract columns from context
+    context_columns = test_df.columns[4:]  # Context columns start from position 4
     
-    # Crear un identificador para cada contexto único si no existe ya
+    # Create an identifier for each unique context if it doesn't already exist
     if 'context_id' not in test_df.columns:
         test_df['context_id'] = test_df.apply(
             lambda row: generate_context_id(row[context_columns].values), 
             axis=1
         )
     
-    # Agrupar por usuario_id y context_id
+    # Group by user_id and context_id
     grouped = test_df.groupby(['user_id:token', 'context_id'])
     
-    # Crear un DataFrame con los datos agrupados
+    # Create a DataFrame with the grouped data
     unique_contexts = []
     for (user_id, context_id), group in grouped:
-        # Tomamos el primer registro del grupo para obtener el contexto
+        # We take the first record in the group to get the context
         first_row = group.iloc[0]
         context_values = first_row[context_columns].values
         
-        # Añadimos el usuario, context_id y los valores del contexto
+        # Add the user, context_id and context values
         unique_contexts.append({
             'user_id': user_id,
             'context_id': context_id,
             'context_values': context_values,
-            'game_ids': group['game_id:token'].tolist()  # Guardamos todos los game_ids asociados
+            'game_ids': group['game_id:token'].tolist()  # We save all the associated game_ids
         })
     
     return unique_contexts
@@ -73,26 +73,26 @@ def process_chunk(chunk_data, context_model, total_unique_contexts):
         user_id = context_data['user_id']
         context_id = context_data['context_id']
         context = context_data['context_values']
-        game_ids = context_data['game_ids']  # Esto ahora lo guardamos pero no lo usamos para las recomendaciones
+        game_ids = context_data['game_ids']  # We now save this but do not use it for recommendations.
         
-        # Obtener los ítems que cumplen con el contexto
+        # Get the items that meet the context
         items, relevance = context_model.recommend(context, 20)
         
-        # Generamos una fila por cada recomendación para el formato user_id_context_id, item_id, prediction
+        # We generate a row for each recommendation for the format user_id_context_id, item_id, prediction
         for item_id, pred in zip(items, relevance):
             result.append([f"{user_id}_{context_id}", item_id, pred])
             
         end_time = time.time()
         
-        if idx % 100 == 0:  # Reducimos la frecuencia de impresión para mejorar rendimiento
-            print(f"Procesado: {idx}/{total_unique_contexts} - Tiempo: {end_time - start_time:.4f} segundos")
+        if idx % 100 == 0:  # We reduced the printing frequency to improve performance
+            print(f"Processed: {idx}/{total_unique_contexts} - Time: {end_time - start_time:.4f} seconds")
     
     return result
 
 def process_fold(fold, dataset, method='contextrandom'):
-    print(f"Procesando dataset {dataset}, fold {fold}, método {method}")
+    print(f"Processing dataset {dataset}, fold {fold}, method {method}")
     
-    # Cargar datos
+    # Load data
     start_time = time.time()
     train_df = pd.read_csv(TRAIN_PATH.format(dataset, dataset, fold), sep='\t',
     dtype={
@@ -147,94 +147,94 @@ def process_fold(fold, dataset, method='contextrandom'):
         'social_companion_children:float': np.int32,
         'social_companion_family:float': np.int32,
         'social_companion_friends:float': np.int32})
-    print(f"Datos cargados en {time.time() - start_time:.2f} segundos")
+    print(f"Data loaded in {time.time() - start_time:.2f} seconds")
     
     # Extraer las columnas de contexto
-    context_columns = test_df.columns[4:]  # Las columnas de contexto comienzan desde la posición 4
+    context_columns = test_df.columns[4:]  # Context columns start from position 4
     
-    # Crear una copia del DataFrame de test y añadir identificador de contexto
+    # Create a copy of the test DataFrame and add context identifier
     start_time = time.time()
     test_df_copy = test_df.copy()
     
-    # Crear un identificador para cada contexto único
+    # Create an identifier for each unique context
     test_df_copy['context_id'] = test_df_copy.apply(
         lambda row: generate_context_id(row[context_columns].values), 
         axis=1
     )
     
-    # Eliminar las columnas de contexto y dejar solo las importantes y el context_id
+    # Remove context columns and leave only the important ones and the context_id
     test_df_simplified = test_df_copy[['user_id:token', 'game_id:token', 'rating:float', 'timestamp:float', 'context_id']].copy()
     simplified_path = os.path.join(os.path.dirname(RESULTS_PATH.format(dataset, method.lower(), fold)), 
                                   f"{dataset}_test_simplified_f{fold}.tsv")
     os.makedirs(os.path.dirname(simplified_path), exist_ok=True)
     test_df_simplified.to_csv(simplified_path, sep='\t', index=False)
-    print(f"Creado dataset simplificado con context_id en: {simplified_path}")
+    print(f"Created simplified dataset with context_id in: {simplified_path}")
     
-    # Agrupar los datos de test por usuario y contexto
+    # Group test data by user and context
     unique_contexts = group_by_user_context(test_df)
-    print(f"Datos agrupados en {time.time() - start_time:.2f} segundos")
-    print(f"Total de contextos únicos: {len(unique_contexts)} (antes había {len(test_df)} filas)")
+    print(f"Data grouped in {time.time() - start_time:.2f} seconds")
+    print(f"Total unique contexts: {len(unique_contexts)} (number of rows before: {len(test_df)})")
     
-    # Inicializar el modelo según el método seleccionado
+    # Initialize the model according to the selected method
     start_time = time.time()
     if method.lower() == 'contextpop':
         context_model = ContextPop(train_df)
-    else:  # Por defecto, usamos ContextRandom
+    else:  # By default, we use ContextRandom
         context_model = ContextRandom(train_df)
-    print(f"Índice construido en {time.time() - start_time:.2f} segundos")
+    print(f"Index built in {time.time() - start_time:.2f} seconds")
 
-    # Preparar el procesamiento en paralelo
+    # Prepare for parallel processing
     total_unique_contexts = len(unique_contexts)
     pool = mp.Pool(processes=NUM_WORKERS)
     
-    # Dividir los contextos únicos en chunks para procesamiento paralelo
+    # Split single contexts into chunks for parallel processing
     chunk_size = max(1, len(unique_contexts) // NUM_WORKERS)
     chunks = [(i, unique_contexts[i:i+chunk_size]) 
               for i in range(0, len(unique_contexts), chunk_size)]
     
-    # Función parcial con los parámetros fijos
+    # Partial function with fixed parameters
     process_func = partial(process_chunk, context_model=context_model, total_unique_contexts=total_unique_contexts)
     
-    # Ejecutar el procesamiento en paralelo
-    print(f"Iniciando procesamiento paralelo con {NUM_WORKERS} workers...")
+    # Run processing in parallel
+    print(f"Starting parallel processing with {NUM_WORKERS} workers...")
     start_time = time.time()
     results = pool.map(process_func, chunks)
     pool.close()
     pool.join()
     
-    # Aplanar los resultados
+    # Flatten the results
     result_context = [item for sublist in results for item in sublist]
-    print(f"Procesamiento paralelo completado en {time.time() - start_time:.2f} segundos")
+    print(f"Parallel processing completed in {time.time() - start_time:.2f} seconds")
 
-    # Guardar resultados
+    # Save results
     result_df = pd.DataFrame(result_context, columns=['user_id', 'item_id', 'prediction'])
     result_path = RESULTS_PATH.format(dataset, method.lower(), fold)
-    os.makedirs(os.path.dirname(result_path), exist_ok=True)  # Asegurar que el directorio exista
+    os.makedirs(os.path.dirname(result_path), exist_ok=True)  # Ensure that the directory exists
     result_df.to_csv(result_path, sep='\t', index=False)
-    print(f"Resultados guardados en: {result_path}")
+    print(f"Results saved in: {result_path}")
 
-    # Crear un mapeo de context_id a game_ids para análisis posterior (opcional)
+    # Create a mapping from context_id to game_ids for further analysis (optional)
     context_mapping = {data['context_id']: data['game_ids'] for data in unique_contexts}
     mapping_path = os.path.join(os.path.dirname(result_path), f"{dataset}_context_mapping_f{fold}.tsv")
     
-    # Guardar el mapeo como un archivo TSV
+    # Save the mapping as a TSV file
     with open(mapping_path, 'w') as f:
         f.write("context_id\tgame_ids\n")
         for context_id, game_ids in context_mapping.items():
             f.write(f"{context_id}\t{','.join(map(str, game_ids))}\n")
     
-    print(f"Mapeo de contexto guardado en: {mapping_path}")
+    print(f"Context mapping saved in: {mapping_path}")
 
 if __name__ == "__main__":
     # Configurar argumentos de línea de comandos
-    parser = argparse.ArgumentParser(description='Ejecutar prefiltering con diferentes métodos.')
+    parser = argparse.ArgumentParser(description='Run prefiltering with different methods.')
     parser.add_argument('--method', type=str, default='contextrandom', 
                         choices=AVAILABLE_METHODS,
-                        help='Método de recomendación a utilizar (contextrandom o contextpop)')
+                        help='Recommendation method to use (contextrandom or contextpop)')
     parser.add_argument('--datasets', type=str, nargs='+', default=DATASETS,
-                        help='Datasets a procesar')
+                        help='Datasets to process')
     parser.add_argument('--folds', type=int, default=FOLDS,
-                        help='Número de folds a procesar')
+                        help='Number of folds to process')
     
     args = parser.parse_args()
     
@@ -244,6 +244,6 @@ if __name__ == "__main__":
         for fold in range(args.folds):
             fold_start = time.time()
             process_fold(fold, dataset, method=args.method)
-            print(f"Fold {fold} completado en {time.time() - fold_start:.2f} segundos")
+            print(f"Fold {fold} finished in {time.time() - fold_start:.2f} seconds")
     
-    print(f"Procesamiento total completado en {time.time() - start_global:.2f} segundos")
+    print(f"Total processing finished in {time.time() - start_global:.2f} seconds")
