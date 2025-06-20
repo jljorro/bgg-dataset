@@ -14,13 +14,13 @@ This dataset does not include any contextual information. It is used to train an
 
 - **Folder**: `bgg25_continuous_metadata`. 
 
-This dataset includes contextual information extracted from the games' metadata. Each context attribute is represented as a `float` value (0.0 or 1.0). We used this representation to avoid the use of embeddings in RecBole models (i.e., converting attributes into categories), and to analyze how this configuration affects recommendation performance.
+This dataset includes contextual information extracted from the games' metadata. Each context attribute is represented as a `float` value (0.0 or 1.0). Thus, attributes are not converted to internal embeddings in RecBole.
 
 ## Discrete Context Values Metadata
 
 - **Folder**: `bgg25_discrete_metadata`. 
 
-This dataset also includes contextual information from the games' metadata, but in this case, each context attribute is represented as a discrete `token` (e.g., 0 or 1). This allows the use of embeddings in RecBole models by treating attributes as categorical variables. We used this version to observe how embedding-based context modeling influences the results.
+This dataset also includes contextual information from the games' metadata, but each context attribute is represented as a discrete `token` (e.g., 0 or 1). This allows the use of embeddings in RecBole models by treating attributes as categorical variables.
 
 ## Continuous Context Values from Reviews
 
