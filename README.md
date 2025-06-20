@@ -50,7 +50,7 @@ Ensure CUDA 12.5 is correctly set up and detected.
 - Navigate to the recbole experiment directory
 
 ```bash
-cd path/to/recbole/experiments
+cd recbole
 ```
 
 - Install dependencies
@@ -75,15 +75,27 @@ pip install ranx
 
 You can switch between the environments using:
 
-```bash
+```bashP
 pyenv activate elliot-env # For elliot experiments
 pyenv activate recbole-env # For recbole experiments
 pyenv activate ranx-env # For evaluation
 ```
 
-## Scripts
+> [!Important] Script Execution Paths
+> Most scripts assume that this repository has been cloned into the home directory (~).
+> However, in some cases this assumption may not hold, and paths will need to be adjusted manually in the scripts or configuration files.
+> For example, in elliot configurations files, you should modify the dataset path as follows:
+>
+> ```yaml
+>...
+># Default path
+>dataset_path: ~/bgg-recsys25/data/bgg25_raw_ratings/
+>
+># Updated path (replace [YOUR_PATH] accordingly)
+>dataset_path: [YOUR_PATH]/data/bgg25_raw_ratings/
+>...
+> ```
 
-Most scripts assume this repository is downloaded in the home (~) directory. Otherwise, you need to change the path directory in scripts and configuration files.
 
 ## Recommender models tested
 
