@@ -2,7 +2,13 @@
 
 This folder contains four datasets with information about user interactions with board games from the BoardGameGeek platform. Each dataset includes the following fields: a user identifier (`user_id`), a game identifier (`game_id`), a rating (`rating`), and a timestamp (`timestamp`) indicating when the interaction took place.
 
-In addition, all three datasets include 21 contextual attributes that describe aspects of the interaction or the items involved. These context features are represented in different formats across the datasets to support various experimental settings and model configurations
+In addition, all three datasets include 21 contextual attributes that describe aspects of the interaction or the items involved. These contextual attributes are grouped into three contextual dimensions as follows:
+
+- **Playing time**: `playing_time_very_short`, `playing_time_short`, `playing_time_moderate`, `playing_time_long` and `playing_time_very_long`.
+- **Gaming mood**: `gaming_mood_party`, `gaming_mood_easy-going`, `gaming_mood_expert`, `gaming_mood_intense`, `gaming_mood_cooperative`, `gaming_mood_competitive`, `gaming_mood_thematic`, `gaming_mood_story-based`.
+- **Social companion**: `social_companion_1-player`, `social_companion_2-players`, `social_companion_large-group`, `social_companion_toddlers`, `social_companion_preschoolers`, `social_companion_children`, `social_companion_family`, `social_companion_friends`.
+
+These context features are represented in different formats across the datasets to support various experimental settings and model configurations
 
 ## Raw Ratings
 
