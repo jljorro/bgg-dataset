@@ -81,7 +81,8 @@ pyenv activate recbole-env # For recbole experiments
 pyenv activate ranx-env # For evaluation
 ```
 
->[!Important] Script Execution Paths
+>[!Important] 
+>### Script Execution Paths
 >Most scripts assume that this repository has been cloned into the home directory (~).
 >However, in some cases this assumption may not hold, and paths will need to be adjusted manually in the scripts or configuration files.
 >For example, in elliot configurations files, you should modify the dataset path as follows:
