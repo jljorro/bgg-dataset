@@ -82,11 +82,11 @@ pyenv activate ranx-env # For evaluation
 ```
 
 >[!Important] Script Execution Paths
-> Most scripts assume that this repository has been cloned into the home directory (~).
-> However, in some cases this assumption may not hold, and paths will need to be adjusted manually in the scripts or configuration files.
-> For example, in elliot configurations files, you should modify the dataset path as follows:
+>Most scripts assume that this repository has been cloned into the home directory (~).
+>However, in some cases this assumption may not hold, and paths will need to be adjusted manually in the scripts or configuration files.
+>For example, in elliot configurations files, you should modify the dataset path as follows:
 >
-> ```yaml
+>```yaml
 >...
 ># Default path
 >dataset_path: ~/bgg-recsys25/data/bgg25_raw_ratings/
@@ -94,8 +94,7 @@ pyenv activate ranx-env # For evaluation
 ># Updated path (replace [YOUR_PATH] accordingly)
 >dataset_path: [YOUR_PATH]/data/bgg25_raw_ratings/
 >...
-> ```
-
+>```
 
 ## Recommender models tested
 
