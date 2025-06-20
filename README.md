@@ -4,23 +4,88 @@ Repository that contains recommender models evaluations for new dataset from Boa
 
 ## Installation
 
-These scripts requires:
+To ensure reproducibility and avoid dependency conflicts, we recommend using three separate Python virtual environments managed with `pyenv`:
 
-- Python 3.10
-- CUDA 12.5
+- One for running experiments with [Elliot](https://elliot.readthedocs.io/en/latest/) (Python 3.8)
+- One for running experiments with [RecBole](https://recbole.io/) (Python 3.10 + CUDA 12.5)
+- One for evaluation with [Ranx](https://amenra.github.io/ranx/evaluate/) (Python 3.12)
 
-### Install dependencies
+This setup helps maintain clean and compatible environments for each task.
+
+### Prerequisites
+
+  - pyenv installed on your system
+  - CUDA 12.5 installed and properly configured (for RecBole experiments)
+
+### Create virtual environment for Elliot (Python 3.8)
 
 ```bash
-pip install -r requirement.txt
+pyenv install 3.8.18
+pyenv virtualenv 3.8.18 elliot-env
+pyenv activate elliot-env
 ```
 
-### Scripts
+- Navigate to the elliot experiment directory:
+
+```bash
+cd elliot
+```
+
+- Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Create virtual environment for RecBole (Python 3.10)
+
+```bash
+pyenv install 3.10.13
+pyenv virtualenv 3.10.13 recbole-env
+pyenv activate recbole-env
+```
+
+Ensure CUDA 12.5 is correctly set up and detected.
+
+- Navigate to the recbole experiment directory
+
+```bash
+cd path/to/recbole/experiments
+```
+
+- Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Create virtual environment for evaluation with Ranx (Python 3.12)
+
+```bash
+pyenv install 3.12.3
+pyenv virtualenv 3.12.3 ranx-env
+pyenv activate ranx-env
+```
+
+- Install dependencies (e.g., Ranx)
+
+```bash
+pip install ranx
+```
+
+You can switch between the environments using:
+
+```bash
+pyenv activate elliot-env # For elliot experiments
+pyenv activate recbole-env # For recbole experiments
+pyenv activate ranx-env # For evaluation
+```
+
+## Scripts
 
 Most scripts assume this repository is downloaded in the home (~) directory. Otherwise, you need to change the path directory in scripts and configuration files.
 
-
-### Recommender models tested
+## Recommender models tested
 
 - *General Recommender Models*
   - Random
@@ -34,19 +99,28 @@ Most scripts assume this repository is downloaded in the home (~) directory. Oth
   - FM
   - DeepFM
 
-### Folders
+## Folders
 
-- data: data corresponding to the dataset described in the paper, divided in ratings, continuous, and discrete, the last two with the context extracted either from metadata or reviews
-- elliot: configuration files and code to use with Elliot
-- evaluation: scripts to evaluate the models
-- prefiltering: new implemented prefiltering methods
-- recbole: configuration files and code to use with RecBole
+- `data`: data corresponding to the dataset described in the paper, divided in ratings, continuous, and discrete, the last two with the context extracted either from metadata or reviews
+- `elliot`: configuration files and code to use with Elliot
+- `evaluation`: scripts to evaluate the models
+- `prefiltering`: new implemented prefiltering methods
+- `recbole`: configuration files and code to use with RecBole
 
-### Elliot Experiments
+> [!IMPORTANT]
+> Before running any experiments, make sure to extract the datasets.
+> To do this, execute the provided script:
+> ```bash
+> bash unzip_datasets.sh
+> ```
+> This will decompress all necessary dataset files into their corresponding directories.
+
+
+## Elliot Experiments
 
 The Elliot framework is used for implementing general recommendation algorithms.
 
-#### Step 1: Hyperparameter Tuning
+### Step 1: Hyperparameter Tuning
 
 First, execute all scripts in the `elliot/hypertune` folder to find the best hyperparameters for each model:
 
@@ -63,11 +137,11 @@ python run_UserKNN.py
 # Continue with other hyperparameter tuning scripts
 ```
 
-#### Step 2: Adapting Configuration Files
+### Step 2: Adapting Configuration Files
 
 After identifying the best hyperparameters, modify the YAML configuration files in the `elliot/final` folder to incorporate these optimal values.
 
-#### Step 3: Running Final Models
+### Step 3: Running Final Models
 
 Execute the final models with the optimized configurations:
 
@@ -78,11 +152,11 @@ python run User_KNN.py
 # Continue with other scripts
 ```
 
-### RecBole Experiments
+## RecBole Experiments
 
 RecBole experiments require GPU acceleration for optimal performance.
 
-#### Step 1: Hyperparameter Search
+### Step 1: Hyperparameter Search
 
 Run the Ray Tune script to search for the best hyperparameters:
 
@@ -93,11 +167,11 @@ python ray_hiperparametres.py
 
 **Note**: GPU usage is required for this step.
 
-#### Step 2: Configure Final Models
+### Step 2: Configure Final Models
 
 Based on the results from the hyperparameter search, modify the configuration files in the `final/config/hyperparameters` directory.
 
-#### Step 3: Execute Final Experiments
+### Step 3: Execute Final Experiments
 
 Run the CARS (Context-Aware Recommender Systems) experiments:
 
@@ -106,7 +180,7 @@ cd final
 python execute_cars_experiment_v2.py
 ```
 
-### Prefiltering
+## Prefiltering
 
 To execute the prefiltering process, run the following script:
 
@@ -116,15 +190,15 @@ python exec_prefiltering.py
 
 This will preprocess the data according to the defined filtering criteria.
 
-### Evaluation
+## Evaluation
 
 After generating recommendations with each recommender system, you need to evaluate their performance.
 
-#### Step 1: Copy Predictions
+### Step 1: Copy Predictions
 
 Copy the predictions generated by each recommender type to their respective evaluation folders.
 
-#### Step 2: Run Evaluation Scripts
+### Step 2: Run Evaluation Scripts
 
 For each recommender type, run the evaluation script:
 
@@ -139,7 +213,7 @@ python evaluation/context/evaluation_script.py
 python evaluation/cars_models/evaluation_script.py
 ```
 
-### Examples
+## Examples
 
 Here's an example workflow for a complete experiment:
 
@@ -152,7 +226,7 @@ Here's an example workflow for a complete experiment:
 7. Execute prefiltering if needed
 8. Run evaluation scripts for each recommender type
 
-### Notes
+## Notes
 
 - Make sure you have sufficient disk space to store the model outputs and prediction results
 - GPU acceleration is strongly recommended for RecBole experiments
