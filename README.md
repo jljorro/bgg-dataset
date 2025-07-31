@@ -1,4 +1,4 @@
-# Boardgames Dataset RecSys 2025
+# Boardgames Dataset 
 
 Repository that contains recommender models evaluations for new dataset from BoardGameGeek.
 
